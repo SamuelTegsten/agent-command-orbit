@@ -65,6 +65,21 @@ export function useSystemPulse(): Pulse {
   const upH = Math.floor(up / 3_600_000);
   const upM = Math.floor((up % 3_600_000) / 60_000);
 
+  // Before mount, render stable placeholders so server and client HTML match.
+  if (!mounted) {
+    return {
+      clock: "--:--:-- UTC",
+      uptime: "—",
+      activeRuns: 4,
+      queue: 2,
+      latencyMs: 214,
+      tokPerMin: 41.2,
+      nodesBusy: topoNodes.filter((n) => n.status === "busy").length,
+      nodesTotal: topoNodes.length,
+      events: [],
+    };
+  }
+
   return {
     clock: stamp(now) + " UTC",
     uptime: `${upH}h ${String(upM).padStart(2, "0")}m`,
