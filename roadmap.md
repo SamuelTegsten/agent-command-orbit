@@ -1,2 +1,2 @@
 - [x] Factory rework
-- [ ] Factory chat as Lovable-style left side panel
+- [x] Factory chat as Lovable-style left side panel
