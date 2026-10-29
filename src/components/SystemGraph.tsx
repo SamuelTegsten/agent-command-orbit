@@ -325,7 +325,6 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
         </div>
         <div className="pointer-events-none absolute font-mono text-[8px] uppercase tracking-[0.18em] text-muted-foreground" style={{ left: `${(106 / W) * 100}%`, top: `${(69 / H) * 100}%` }}>nodes · {fleet.filter((f) => f.status === "busy").length}/{fleet.length} busy</div>
         </div>
-        </div>
       </div>
 
       {!compact && <div className="grid gap-0 border-t border-border md:grid-cols-[1fr_1.2fr]">
