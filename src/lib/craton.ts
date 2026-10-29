@@ -69,10 +69,10 @@ export type TimelineItem =
   | { kind: "landed"; text: string; ago: string }
   | { kind: "failed"; text: string; ago: string }
   | { kind: "answer"; text: string; ago: string };
-export type Instruction = { n: number; text: string; status: "landed" | "failed" | "running" | "waiting"; commit?: string };
+export type Instruction = { n: number; text: string; status: "landed" | "failed" | "running" | "waiting"; commit?: string | undefined };
 export type Session = {
   id: string; title: string; status: SessionStatus; branch: string; commit: string; ago: string;
-  scope: string; cost: string; intent?: string; stage?: Stage;
+  scope: string; cost: string; intent?: string | undefined; stage?: Stage | undefined;
   instructions: Instruction[]; timeline: TimelineItem[];
 };
 
