@@ -7,7 +7,7 @@ const kindIcon = { Workstation: Monitor, Laptop, Service: Server, Terminal } as 
 
 // Layout in % of an exact 16:10 canvas. SVG uses viewBox 160x100, so x * 1.6.
 const X = 1.6;
-const HUB = { x: 44, y: 40, left: 33, right: 55, bottom: 60 };
+const HUB = { x: 44, y: 40, left: 33, right: 55, bottom: 58 };
 const clientY = (i: number) => 14 + i * 22;
 const zoneTop = (i: number) => 4 + i * 32;
 const slotY = (hi: number, si: number) => zoneTop(hi) + 9 + si * 7.4;
@@ -91,7 +91,7 @@ export function TopologyCanvas({ topo }: { topo: Topo }) {
         })}
         {/* hub → models */}
         {models.map((m, i) => {
-          const d = vcurve(HUB.x + (i - 1) * 6, HUB.bottom, modelX(i), MODEL_Y - 4);
+          const d = vcurve(HUB.x + (i - 1) * 6, HUB.bottom, modelX(i), MODEL_Y);
           const used = nodes.some((n) => n.model === m.id && n.status === "busy");
           return (
             <g key={m.id} className={`transition-opacity duration-300 ${dim(m.id)}`}>
@@ -151,8 +151,8 @@ export function TopologyCanvas({ topo }: { topo: Topo }) {
       </div>
 
       {/* Inference lane */}
-      <div className="absolute -translate-x-1/2 -translate-y-1/2 rounded-sm border border-dashed border-border px-2 pb-1 pt-4" style={{ left: `${modelX(1)}%`, top: `${MODEL_Y + 2}%`, width: "40%" }}>
-        <div className="absolute left-2 top-0.5 font-mono text-[9px] tracking-widest text-muted-foreground">INFERENCE · GPU SERVERS</div>
+      <div className="absolute -translate-x-1/2 -translate-y-1/2 rounded-sm border border-dashed border-border" style={{ left: `${modelX(1)}%`, top: `${MODEL_Y + 1}%`, width: "40%", height: "11%" }}>
+        <div className="absolute -top-2 left-2 bg-card px-1 font-mono text-[9px] tracking-widest text-muted-foreground">INFERENCE · GPU SERVERS</div>
       </div>
       {models.map((m, i) => {
         const s: Selection = { kind: "model", id: m.id };
@@ -211,7 +211,7 @@ export function TopologyCanvas({ topo }: { topo: Topo }) {
 
 function Packet({ path, cls, dur, offset, reverse }: { path: string; cls: string; dur: number; offset: number; reverse?: boolean }) {
   return (
-    <circle r={0.9} className={cls} filter="url(#glow)">
+    <circle r={0.6} className={cls} filter="url(#glow)">
       <animateMotion dur={`${dur}s`} begin={`${offset}s`} repeatCount="indefinite" keyPoints={reverse ? "1;0" : "0;1"} keyTimes="0;1" calcMode="linear">
         <mpath href={`#${path}`} />
       </animateMotion>
