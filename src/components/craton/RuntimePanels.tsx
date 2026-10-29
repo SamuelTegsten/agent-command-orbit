@@ -10,15 +10,15 @@ const LOW_DISK = 7.5;
 
 /* ───────────────────────── Setup: health strip ───────────────────────── */
 
-export function SetupGrid() {
+export function SetupGrid({ embedded = false }: { embedded?: boolean } = {}) {
   const cards = useMemo(() => [...setup].sort((a, b) => toneRank[a.tone] - toneRank[b.tone]), []);
   const issues = cards.filter((c) => c.tone === "bad" || c.tone === "warn");
   const [open, setOpen] = useState<string | null>(null);
   const sel = cards.find((c) => c.key === open);
 
   return (
-    <section className="panel overflow-hidden">
-      <header className="panel-head flex items-center gap-3 px-3 py-2">
+    <section className={embedded ? "border-t border-border/60 bg-background/30" : "panel overflow-hidden"}>
+      <header className={`flex items-center gap-3 px-4 py-2 ${embedded ? "border-b border-border/40" : "panel-head"}`}>
         <h2 className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em]">Setup</h2>
         <span className="font-mono text-[10px] text-muted-foreground">
           {cards.length - issues.length}/{cards.length} healthy
@@ -53,7 +53,8 @@ export function SetupGrid() {
               {active && <span className="absolute inset-x-0 top-0 h-0.5 bg-primary" />}
               <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                 <span className={`h-1.5 w-1.5 rounded-full ${toneDot[c.tone]} ${c.tone === "bad" ? "blink" : ""}`} />
-                {c.label}
+                <span className="truncate">{c.label}</span>
+                
                 <ChevronRight className={`ml-auto h-3 w-3 transition-transform ${active ? "rotate-90 text-primary" : "opacity-0 group-hover:opacity-100"}`} />
               </div>
               <div className={`mt-0.5 font-display text-base font-bold ${c.tone === "bad" ? "text-destructive" : ""}`}>{c.value}</div>

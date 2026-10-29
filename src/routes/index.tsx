@@ -47,19 +47,22 @@ function Monitor() {
 
   return (
     <div className="space-y-6">
-      {/* KPI gauges */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {tiles.map((t) => (
-          <div key={t.k} className="panel flex items-center gap-4 p-4">
-            <Ring pct={t.pct} tone={t.tone} />
-            <div className="min-w-0 flex-1">
-              <div className="font-display text-2xl font-bold leading-none">{t.v}</div>
-              <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{t.k}</div>
-              {t.d && <div className="mt-2 opacity-70"><Sparkline data={t.d} className={t.tone === "success" ? "stroke-success" : t.tone === "accent" ? "stroke-accent" : "stroke-primary"} /></div>}
+      {/* KPI gauges + setup health, one instrument panel */}
+      <section className="panel overflow-hidden">
+        <div className="grid grid-cols-2 divide-border/60 lg:grid-cols-4 lg:divide-x">
+          {tiles.map((t) => (
+            <div key={t.k} className="relative flex items-center gap-4 px-5 py-4">
+              <Ring pct={t.pct} tone={t.tone} />
+              <div className="min-w-0 flex-1">
+                <div className="font-display text-2xl font-bold leading-none">{t.v}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{t.k}</div>
+                {t.d && <div className="mt-2 opacity-70"><Sparkline data={t.d} className={t.tone === "success" ? "stroke-success" : t.tone === "accent" ? "stroke-accent" : "stroke-primary"} /></div>}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+        <SetupGrid embedded />
+      </section>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
         <section className="min-w-0 space-y-2">
@@ -109,7 +112,6 @@ function Monitor() {
         </aside>
       </div>
 
-      <SetupGrid />
       <FleetPanel />
 
     </div>
