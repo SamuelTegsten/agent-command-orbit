@@ -162,17 +162,6 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
           </div>
         ))}
 
-        {/* edge label for active edge */}
-        {activeEdge && (() => {
-          const a = byId[activeEdge.from]!;
-          const b = byId[activeEdge.to]!;
-          return (
-            <div key={step} className="fade-in pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-sm border border-primary/60 bg-background/90 px-1.5 py-0.5 font-mono text-[9px] text-primary" style={{ left: `${((a.x + b.x) / 2 / W) * 100}%`, top: `${((a.y + b.y) / 2 / H) * 100 - 3}%` }}>
-              {activeEdge.label}
-            </div>
-          );
-        })()}
-
         {/* callout for the node receiving work */}
         {activeEdge && (() => {
           const n = byId[activeEdge.to]!;
