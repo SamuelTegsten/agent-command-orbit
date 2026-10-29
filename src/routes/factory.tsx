@@ -344,58 +344,11 @@ function SessionView({ session: x, update }: { session: Session; update: Update 
   const jump = (n: number) => document.getElementById(`ins-${x.id}-${n}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-3">
-      {/* Header */}
-      <section className="panel overflow-hidden">
-        <div className="flex flex-wrap items-center gap-3 px-3 py-2.5">
-          <Link to="/factory" className="grid h-7 w-7 place-items-center rounded-sm border border-border text-muted-foreground hover:border-primary hover:text-primary" aria-label="Back to sessions"><ChevronLeft className="h-4 w-4" /></Link>
-          <span className={`h-2.5 w-2.5 rounded-full ${paused ? "bg-accent" : dot[x.status]}`} />
-          <div className="min-w-0">
-            <h1 className="truncate font-display text-lg font-bold leading-tight">{x.title}</h1>
-            <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-muted-foreground">
-              <span>{x.id}</span>
-              <button onClick={() => { void navigator.clipboard?.writeText(`${x.branch}@${x.commit}`); toast("Branch copied"); }} className="flex items-center gap-1 hover:text-primary" title="Copy branch"><GitBranch className="h-3 w-3" />{x.branch} @ {x.commit}</button>
-              <span>· {x.cost}</span>
-            </div>
-          </div>
-          <div className="ml-auto flex gap-1.5">
-            <HeadBtn onClick={togglePause} icon={paused ? Play : Pause}>{paused ? "Resume" : "Pause"}</HeadBtn>
-            <HeadBtn disabled={counts.landed === 0 || working} onClick={() => toast.success(`Publishing ${x.commit} to production…`)} icon={Rocket} title={counts.landed === 0 ? "Nothing landed yet" : undefined}>Publish</HeadBtn>
-            <HeadBtn onClick={() => { update(x.id, (s) => ({ ...s, status: "archived" })); toast("Session archived"); navigate({ to: "/factory", search: {} }); }} icon={Archive} danger>Archive</HeadBtn>
-          </div>
-        </div>
-        {/* Stage rail */}
-        <div className="grid grid-cols-4 border-t border-border/60">
-          {stages.map((st, i) => {
-            const state = i < stageIdx ? "done" : i === stageIdx ? "now" : "todo";
-            return (
-              <div key={st} className="relative px-3 py-1.5">
-                <div className={`absolute inset-x-0 top-0 h-0.5 ${state === "done" ? "bg-success" : state === "now" ? "bg-primary blink" : "bg-border"}`} />
-                <div className={`flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] ${state === "now" ? "text-primary" : state === "done" ? "text-success" : "text-muted-foreground"}`}>
-                  {state === "done" ? <Check className="h-3 w-3" /> : <span className="w-3 text-center">{i + 1}</span>}{st}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {x.status === "failed" && lastFailed && (
-        <div className="flex flex-wrap items-center gap-3 rounded-sm border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">
-          <AlertTriangle className="h-4 w-4 text-destructive" />
-          <span><b>#{lastFailed.n} failed.</b> <span className="text-muted-foreground">{lastFailed.text.slice(0, 90)}…</span></span>
-          <div className="ml-auto flex gap-1.5">
-            <button onClick={retry} className="flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"><RotateCcw className="h-3 w-3" />Retry</button>
-            <button onClick={() => { setDraft(`Follow-up on #${lastFailed.n}: `); input.current?.focus(); }} className="rounded-sm border border-border px-3 py-1 text-xs hover:border-primary">Write follow-up</button>
-          </div>
-        </div>
-      )}
-
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="mx-auto grid max-w-[1600px] items-start gap-3 lg:grid-cols-[400px_minmax(0,1fr)]">
         {/* Timeline + composer */}
-        <section className="panel flex h-[calc(100vh-17rem)] min-h-[520px] flex-col overflow-hidden">
+        <section className="panel sticky top-16 flex h-[calc(100vh-7rem)] min-h-[520px] flex-col overflow-hidden">
           <div className="panel-head flex flex-wrap items-center gap-2 px-3 py-2">
-            <h2 className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em]">Timeline</h2>
+            <h2 className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em]">Chat</h2>
             <div className="flex rounded-sm border border-border">
               {([["all", "Everything"], ["notes", "Conductor"]] as const).map(([k, l]) => (
                 <button key={k} onClick={() => setFilter(k)} className={`px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider ${filter === k ? "bg-secondary text-primary" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
@@ -404,7 +357,7 @@ function SessionView({ session: x, update }: { session: Session; update: Update 
             <label className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
               <input type="checkbox" checked={showEvents} onChange={(e) => setShowEvents(e.target.checked)} className="accent-[var(--primary)]" /> events
             </label>
-            <span className="ml-auto truncate font-mono text-[10px] text-muted-foreground">scope · {x.scope}</span>
+            
           </div>
 
           <div className="flex-1 space-y-2 overflow-y-auto p-4">
@@ -444,9 +397,53 @@ function SessionView({ session: x, update }: { session: Session; update: Update 
             </div>
           </div>
         </section>
-
+      <div className="min-w-0 space-y-3">
+      {/* Header */}
+      <section className="panel overflow-hidden">
+        <div className="flex flex-wrap items-center gap-3 px-3 py-2.5">
+          <Link to="/factory" className="grid h-7 w-7 place-items-center rounded-sm border border-border text-muted-foreground hover:border-primary hover:text-primary" aria-label="Back to sessions"><ChevronLeft className="h-4 w-4" /></Link>
+          <span className={`h-2.5 w-2.5 rounded-full ${paused ? "bg-accent" : dot[x.status]}`} />
+          <div className="min-w-0">
+            <h1 className="truncate font-display text-lg font-bold leading-tight">{x.title}</h1>
+            <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-muted-foreground">
+              <span>{x.id}</span>
+              <button onClick={() => { void navigator.clipboard?.writeText(`${x.branch}@${x.commit}`); toast("Branch copied"); }} className="flex items-center gap-1 hover:text-primary" title="Copy branch"><GitBranch className="h-3 w-3" />{x.branch} @ {x.commit}</button>
+              <span>· {x.cost}</span>
+            </div>
+          </div>
+          <div className="ml-auto flex gap-1.5">
+            <HeadBtn onClick={togglePause} icon={paused ? Play : Pause}>{paused ? "Resume" : "Pause"}</HeadBtn>
+            <HeadBtn disabled={counts.landed === 0 || working} onClick={() => toast.success(`Publishing ${x.commit} to production…`)} icon={Rocket} title={counts.landed === 0 ? "Nothing landed yet" : undefined}>Publish</HeadBtn>
+            <HeadBtn onClick={() => { update(x.id, (s) => ({ ...s, status: "archived" })); toast("Session archived"); navigate({ to: "/factory", search: {} }); }} icon={Archive} danger>Archive</HeadBtn>
+          </div>
+        </div>
+        {/* Stage rail */}
+        <div className="grid grid-cols-4 border-t border-border/60">
+          {stages.map((st, i) => {
+            const state = i < stageIdx ? "done" : i === stageIdx ? "now" : "todo";
+            return (
+              <div key={st} className="relative px-3 py-1.5">
+                <div className={`absolute inset-x-0 top-0 h-0.5 ${state === "done" ? "bg-success" : state === "now" ? "bg-primary blink" : "bg-border"}`} />
+                <div className={`flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] ${state === "now" ? "text-primary" : state === "done" ? "text-success" : "text-muted-foreground"}`}>
+                  {state === "done" ? <Check className="h-3 w-3" /> : <span className="w-3 text-center">{i + 1}</span>}{st}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+      {x.status === "failed" && lastFailed && (
+        <div className="flex flex-wrap items-center gap-3 rounded-sm border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          <span><b>#{lastFailed.n} failed.</b> <span className="text-muted-foreground">{lastFailed.text.slice(0, 90)}…</span></span>
+          <div className="ml-auto flex gap-1.5">
+            <button onClick={retry} className="flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"><RotateCcw className="h-3 w-3" />Retry</button>
+            <button onClick={() => { setDraft(`Follow-up on #${lastFailed.n}: `); input.current?.focus(); }} className="rounded-sm border border-border px-3 py-1 text-xs hover:border-primary">Write follow-up</button>
+          </div>
+        </div>
+      )}
         {/* Side: instruction queue */}
-        <aside className="panel self-start overflow-hidden">
+        <aside className="panel overflow-hidden">
           <div className="grid grid-cols-4 divide-x divide-border/60 border-b border-border/60">
             {(Object.entries(counts) as [string, number][]).map(([k, v]) => (
               <div key={k} className="px-2 py-2 text-center">
@@ -471,6 +468,25 @@ function SessionView({ session: x, update }: { session: Session; update: Update 
             ))}
           </ul>
         </aside>
+        <div className="grid gap-3 xl:grid-cols-2">
+          <section className="panel overflow-hidden">
+            <div className="panel-head px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Session facts</div>
+            <dl className="divide-y divide-border/50 font-mono text-[11px]">
+              {[["scope", x.scope], ["branch", x.branch], ["head", x.commit], ["cost", x.cost], ["updated", x.ago], ["state", paused ? "paused" : x.status]].map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4 px-3 py-1.5"><dt className="text-muted-foreground">{k}</dt><dd className="truncate text-right">{v}</dd></div>
+              ))}
+            </dl>
+          </section>
+          <section className="panel overflow-hidden">
+            <div className="panel-head px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Landed on master</div>
+            <ul className="divide-y divide-border/50">
+              {x.timeline.filter((t) => t.kind === "landed").length === 0 && <li className="px-3 py-4 text-xs text-muted-foreground">Nothing landed yet — send an instruction in the chat.</li>}
+              {x.timeline.filter((t) => t.kind === "landed").slice(-6).reverse().map((t, i) => (
+                <li key={i} className="flex items-center gap-2 px-3 py-2 text-xs"><GitMerge className="h-3.5 w-3.5 shrink-0 text-success" /><span className="min-w-0 flex-1 truncate font-mono">{t.text}</span><span className="font-mono text-[10px] text-muted-foreground">{t.ago}</span></li>
+              ))}
+            </ul>
+          </section>
+        </div>
       </div>
     </div>
   );
