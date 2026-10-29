@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { clients, runs } from "@/lib/mock";
-import { gnodes, scenario, zones } from "@/lib/systemGraph";
-import { SectionLabel, StatusDot } from "@/components/AppShell";
+import { runs } from "@/lib/mock";
+import { gnodes, scenario } from "@/lib/systemGraph";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useTopology, type Selection } from "@/components/topology/useTopology";
 import { TopologyCanvas } from "@/components/topology/TopologyCanvas";
@@ -48,14 +46,6 @@ function Monitor() {
   }, []);
   const onSelect = useCallback((id: string) => setGraphSel(id), []);
 
-  const kpis = [
-    { k: "Runs in flight", v: "12", unit: "runs", d: health.tasks, c: "stroke-primary" },
-    { k: "Agents busy", v: `${nodes.filter((n) => n.status === "busy").length}/${nodes.length}`, unit: "nodes", d: null, c: "" },
-    { k: "Tokens", v: `${Math.round(last(health.tokens))}k`, unit: "/ min", d: health.tokens, c: "stroke-success" },
-    { k: "Hub latency", v: `${Math.round(last(health.latency))}`, unit: "ms", d: health.latency, c: "stroke-accent" },
-    { k: "Policy denials", v: `${Math.round(last(health.denials))}`, unit: "today", d: health.denials, c: "stroke-destructive" },
-    { k: "Clients", v: String(clients.length), unit: "connected", d: null, c: "" },
-  ];
 
   const sel = gnodes.find((n) => n.id === graphSel);
   const pickMobile = (s: Selection) => {
@@ -63,122 +53,91 @@ function Monitor() {
     setSheet(true);
   };
 
+  const busy = nodes.filter((n) => n.status === "busy").length;
+  const tiles = [
+    { k: "Runs", v: "12", pct: 12 / 20, d: health.tasks, tone: "primary" },
+    { k: "Agents busy", v: `${busy}/${nodes.length}`, pct: busy / Math.max(1, nodes.length), d: null, tone: "primary" },
+    { k: "Tokens / min", v: `${Math.round(last(health.tokens))}k`, pct: last(health.tokens) / 60, d: health.tokens, tone: "success" },
+    { k: "Latency ms", v: `${Math.round(last(health.latency))}`, pct: last(health.latency) / 100, d: health.latency, tone: "accent" },
+  ] as const;
+
   return (
-    <div className="space-y-4">
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px] 2xl:grid-cols-[230px_minmax(0,1fr)_330px]">
-      {/* Left: data overview */}
-      <aside className="space-y-3 xl:col-span-2 2xl:col-span-1">
-        <div className="panel overflow-hidden">
-          <div className="panel-head">Data overview</div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-1">
-            {kpis.map((x) => (
-              <div key={x.k} className="border-t border-border px-3 py-3 xl:border-l 2xl:border-l-0">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-mono text-2xl font-semibold">{x.v}</span>
-                  <span className="text-[11px] text-muted-foreground">{x.unit}</span>
-                </div>
-                <div className="text-[11px] text-muted-foreground">{x.k}</div>
-                {x.d && <div className="mt-1"><Sparkline data={x.d} className={x.c} /></div>}
-              </div>
-            ))}
-          </div>
-        </div>
-      </aside>
-
-      {/* Center: scene */}
-      <section className="min-w-0 space-y-3">
-        <div className="panel relative overflow-hidden">
-          {scene === "system" ? (
-            <SystemGraph compact onSelect={onSelect} onStep={onStep} />
-          ) : (
-            <div className="space-y-3 p-3">
-              <Toolbar topo={topo} />
-              <div className="hidden lg:block"><TopologyCanvas topo={topo} /></div>
-              <div className="lg:hidden"><StackedView topo={topo} onPick={pickMobile} /></div>
+    <div className="space-y-6">
+      {/* KPI gauges */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {tiles.map((t) => (
+          <div key={t.k} className="panel flex items-center gap-4 p-4">
+            <Ring pct={t.pct} tone={t.tone} />
+            <div className="min-w-0 flex-1">
+              <div className="font-display text-2xl font-bold leading-none">{t.v}</div>
+              <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{t.k}</div>
+              {t.d && <div className="mt-2 opacity-70"><Sparkline data={t.d} className={t.tone === "success" ? "stroke-success" : t.tone === "accent" ? "stroke-accent" : "stroke-primary"} /></div>}
             </div>
-          )}
-        </div>
-        {/* scene switcher */}
-        <div className="flex items-center justify-center gap-1 font-mono text-xs">
-          <button onClick={() => setScene(scene === "system" ? "topology" : "system")} className="p-1.5 text-primary" aria-label="Previous scene"><ChevronLeft className="h-4 w-4" /></button>
-          {scenes.map((s) => (
-            <button key={s.id} onClick={() => setScene(s.id)} className={`rounded-sm px-4 py-1.5 transition-colors ${scene === s.id ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
-              {s.label}
-            </button>
-          ))}
-          <button onClick={() => setScene(scene === "system" ? "topology" : "system")} className="p-1.5 text-primary" aria-label="Next scene"><ChevronRight className="h-4 w-4" /></button>
-        </div>
-      </section>
+          </div>
+        ))}
+      </div>
 
-      {/* Right: details, workflow list, curve */}
-      <aside className="space-y-3">
-        <div className="panel overflow-hidden">
-          <div className="panel-head">{scene === "system" ? "Component" : "Selection"}</div>
-          <div className="p-4">
-            {scene === "system" && sel ? (
-              <div>
-                <SectionLabel>{zones.find((z) => z.id === sel.zone)?.label}</SectionLabel>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="font-semibold">{sel.label}</span>
-                  <span className="ml-auto font-mono text-[11px] text-primary">{sel.metric}</span>
-                </div>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{sel.desc}</p>
-              </div>
-            ) : (
-              <DetailPanel topo={topo} />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+        <section className="min-w-0 space-y-2">
+          <div className="flex items-center gap-1">
+            {scenes.map((s) => (
+              <button key={s.id} onClick={() => setScene(s.id)} className={`border-b-2 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors ${scene === s.id ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+                {s.label}
+              </button>
+            ))}
+            {scene === "system" && sel && (
+              <span className="ml-auto truncate font-mono text-[11px] text-muted-foreground">
+                <span className="text-foreground">{sel.label}</span> · <span className="text-primary">{sel.metric}</span>
+              </span>
             )}
           </div>
-        </div>
-
-        <div className="panel overflow-hidden">
-          <div className="panel-head">Workflow list</div>
-          <table className="w-full text-[11px]">
-            <thead>
-              <tr className="font-mono text-[10px] uppercase text-muted-foreground">
-                <th className="px-4 py-2 text-left font-normal">Run</th>
-                <th className="py-2 text-left font-normal">Step</th>
-                <th className="px-4 py-2 text-right font-normal">State</th>
-              </tr>
-            </thead>
-            <tbody>
-              {runs.map((r) => (
-                <tr key={r.id} className="border-t border-border/60">
-                  <td className="px-4 py-2">
-                    <div className="font-mono">{r.id}</div>
-                    <div className="max-w-[120px] truncate text-muted-foreground">{r.title}</div>
-                  </td>
-                  <td className="py-2 font-mono text-muted-foreground">{r.steps[r.step]}</td>
-                  <td className="px-4 py-2 text-right">
-                    <span className="inline-flex items-center gap-1.5 font-mono uppercase">
-                      <StatusDot status={r.state} />
-                      <span className={r.state === "done" ? "text-success" : r.state === "failed" ? "text-destructive" : r.state === "waiting" ? "text-accent" : "text-primary"}>{r.state}</span>
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="panel overflow-hidden">
-          <div className="panel-head">Throughput · 24 samples</div>
-          <div className="p-4">
-            <AreaCurve data={health.tasks} />
-          </div>
-        </div>
-
-        <div className="panel overflow-hidden">
-          <div className="panel-head">Live trace</div>
-          <div className="h-[132px] space-y-1 overflow-hidden p-3 font-mono text-[10.5px]">
-            {trace.length === 0 && <div className="text-muted-foreground">listening…</div>}
-            {trace.map((l, i) => (
-              <div key={l.k} className={`fade-in truncate ${i === 0 ? "text-primary" : "text-muted-foreground"}`}>
-                <span className="text-muted-foreground">{l.t}</span> › {l.msg}
+          <div className="panel relative overflow-hidden">
+            {scene === "system" ? (
+              <SystemGraph compact onSelect={onSelect} onStep={onStep} />
+            ) : (
+              <div className="space-y-3 p-3">
+                <Toolbar topo={topo} />
+                <div className="hidden lg:block"><TopologyCanvas topo={topo} /></div>
+                <div className="lg:hidden"><StackedView topo={topo} onPick={pickMobile} /></div>
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      </aside>
+        </section>
+
+        <aside className="space-y-4 xl:pt-9">
+          <div className="panel p-4">
+            <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Workflows</div>
+            <ul className="space-y-3">
+              {runs.map((r) => {
+                const tone = r.state === "done" ? "bg-success" : r.state === "failed" ? "bg-destructive" : r.state === "waiting" ? "bg-accent" : "bg-primary";
+                return (
+                  <li key={r.id} title={`${r.title} · ${r.steps[r.step]}`}>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="min-w-0 flex-1 truncate">{r.title}</span>
+                      <span className="font-mono text-[10px] text-muted-foreground">{r.steps[r.step]}</span>
+                    </div>
+                    <div className="mt-1.5 flex gap-0.5">
+                      {r.steps.map((_, i) => (
+                        <span key={i} className={`h-1 flex-1 ${i < r.step ? tone : i === r.step ? `${tone} ${r.state === "running" ? "blink" : ""}` : "bg-border"}`} />
+                      ))}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className="panel p-4">
+            <div className="mb-2 flex items-baseline justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Throughput <span className="text-foreground">{Math.round(last(health.tasks))}/h</span>
+            </div>
+            <AreaCurve data={health.tasks} />
+            {trace[0] && <div key={trace[0].k} className="fade-in mt-2 truncate font-mono text-[10px] text-primary">› {trace[0].msg}</div>}
+          </div>
+        </aside>
+      </div>
+
+      <SetupGrid />
+      <FleetPanel />
 
       <Sheet open={sheet} onOpenChange={setSheet}>
         <SheetContent className="w-[340px] overflow-y-auto border-border bg-card">
@@ -187,9 +146,17 @@ function Monitor() {
         </SheetContent>
       </Sheet>
     </div>
-    <SetupGrid />
-    <FleetPanel />
-    </div>
+  );
+}
+
+function Ring({ pct, tone }: { pct: number; tone: "primary" | "success" | "accent" }) {
+  const r = 18, c = 2 * Math.PI * r, p = Math.max(0.04, Math.min(1, pct));
+  const cls = tone === "success" ? "stroke-success" : tone === "accent" ? "stroke-accent" : "stroke-primary";
+  return (
+    <svg viewBox="0 0 44 44" className="h-12 w-12 shrink-0 -rotate-90">
+      <circle cx="22" cy="22" r={r} fill="none" className="stroke-border" strokeWidth="4" />
+      <circle cx="22" cy="22" r={r} fill="none" className={`${cls} transition-all duration-700`} strokeWidth="4" strokeDasharray={`${c * p} ${c}`} />
+    </svg>
   );
 }
 
