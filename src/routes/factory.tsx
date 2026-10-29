@@ -84,12 +84,6 @@ function Overview({ list, setList }: { list: Session[]; setList: (fn: (l: Sessio
     (filter === "all" || x.status === filter) &&
     (!query || `${x.title} ${x.id} ${x.commit}`.toLowerCase().includes(query.toLowerCase())));
 
-  const stats = [
-    { icon: Activity, k: "Working", v: String(working.length), f: `${visible.length} active sessions` },
-    { icon: Clock, k: "Lead time", v: performance.leadTime, f: `median · p90 ${performance.p90}` },
-    { icon: GitMerge, k: "Merge success", v: performance.mergeSuccess, f: `${performance.merges} merges · 7 d` },
-    { icon: AlertTriangle, k: "Needs you", v: String(failed.length), f: failed.length ? "failed sessions" : "all clear", bad: failed.length > 0 },
-  ];
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-3">
