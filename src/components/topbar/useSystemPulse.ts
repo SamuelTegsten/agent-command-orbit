@@ -36,8 +36,11 @@ const seed: PulseEvent[] = Array.from({ length: 8 }, () => makeEvent()).map((e, 
 
 export function useSystemPulse(): Pulse {
   const [tick, setTick] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const eventsRef = useRef<PulseEvent[]>(seed);
   const vitalsRef = useRef({ activeRuns: 4, queue: 2, latencyMs: 214, tokPerMin: 41.2 });
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const id = setInterval(() => {
