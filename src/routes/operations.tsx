@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { eventTemplates, layers, runs } from "@/lib/mock";
+import { InternalsPipeline } from "@/components/InternalsPipeline";
+import { lifecycleStages } from "@/components/pipelineStages";
 import { SectionLabel, StatusDot } from "@/components/AppShell";
 
 export const Route = createFileRoute("/operations")({
@@ -86,6 +88,8 @@ function Operations() {
         ))}
       </div>
 
+      <InternalsPipeline subtitle="Life of a task" title="One run, end to end" stages={lifecycleStages} speed={1300} />
+
       <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
         <div className="space-y-6">
           {/* Layer stack */}
@@ -117,7 +121,11 @@ function Operations() {
                       );
                     })}
                   </div>
-                  {li < layers.length - 1 && <div className="absolute -bottom-2 left-[75px] h-2 w-px bg-primary/60" />}
+                  {li < layers.length - 1 && (
+                    <div className="absolute -bottom-2 left-[75px] h-2 w-px overflow-visible bg-primary/30">
+                      <span className="drop absolute -left-[2px] h-1.5 w-1.5 rounded-full bg-primary" style={{ animationDelay: `${li * 0.3}s` }} />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
