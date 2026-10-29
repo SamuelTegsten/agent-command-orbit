@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { clients, runs } from "@/lib/mock";
 import { gnodes, scenario, zones } from "@/lib/systemGraph";
@@ -38,16 +38,9 @@ function Monitor() {
   const [graphSel, setGraphSel] = useState("orch");
   const [trace, setTrace] = useState<{ k: number; t: string; msg: string }[]>([]);
   const [sheet, setSheet] = useState(false);
-  const [clock, setClock] = useState("");
   const { nodes, health } = topo;
   const last = (a: number[]) => a[a.length - 1] ?? 0;
 
-  useEffect(() => {
-    const tick = () => setClock(new Date().toLocaleString("en-GB", { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" }));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
 
   const onStep = useCallback((i: number) => {
     const s = scenario[i];
