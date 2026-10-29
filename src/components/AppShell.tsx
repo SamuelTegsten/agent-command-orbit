@@ -1,52 +1,154 @@
 import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Activity, Clock3, Layers, Search, Timer, Zap } from "lucide-react";
+import { layers } from "@/lib/mock";
+import { useSystemPulse } from "./topbar/useSystemPulse";
+import { CommandPalette } from "./topbar/CommandPalette";
+import { AlertsMenu } from "./topbar/AlertsMenu";
 
 const tabs = [
   { to: "/", label: "Monitor", code: "01" },
   { to: "/factory", label: "Factory", code: "02" },
 ] as const;
 
+function Vital({ icon: Icon, label, value, title }: { icon: typeof Zap; label: string; value: string; title: string }) {
+  return (
+    <div title={title} className="flex items-center gap-1.5 border-l border-border/70 pl-3 first:border-0 first:pl-0">
+      <Icon className="h-3 w-3 text-primary" />
+      <span className="text-muted-foreground/70">{label}</span>
+      <span className="text-foreground">{value}</span>
+    </div>
+  );
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
+  const pulse = useSystemPulse();
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const tickerItems = [...pulse.events].reverse();
+  const tickerLine = tickerItems.map((e) => `${e.time}  ${e.source.toUpperCase()} · ${e.text}`);
+
   return (
     <div className="min-h-screen bg-background bg-grid">
       <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[1680px] items-center gap-6 px-6">
-          <Link to="/" className="flex shrink-0 items-center gap-3">
-            <div className="hex grid h-9 w-10 place-items-center bg-accent shadow-[0_0_18px_hsl(var(--accent)/0.35)]">
-              <div className="hex h-4 w-[18px] bg-primary" />
+        {/* Main bar */}
+        <div className="mx-auto flex h-14 max-w-[1680px] items-center gap-4 px-5">
+          <Link to="/" className="flex shrink-0 items-center gap-2.5">
+            <div className="hex grid h-8 w-9 place-items-center bg-accent shadow-[0_0_18px_hsl(var(--accent)/0.35)]">
+              <div className="hex h-3.5 w-4 bg-primary" />
             </div>
             <div className="leading-tight">
-              <div className="font-display text-lg font-bold tracking-wide">
+              <div className="font-display text-base font-bold tracking-wide">
                 Basalt<span className="text-primary">.</span>
-                <span className="ml-2 font-sans text-xs font-normal uppercase tracking-[0.14em] text-muted-foreground">Software Factory</span>
+                <span className="ml-2 hidden font-sans text-[11px] font-normal uppercase tracking-[0.14em] text-muted-foreground sm:inline">
+                  Software Factory
+                </span>
               </div>
-              <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/80">Experter på systemintegration</div>
+              <div className="hidden text-[9px] uppercase tracking-[0.22em] text-muted-foreground/80 md:block">
+                Experter på systemintegration
+              </div>
             </div>
           </Link>
+
           <nav className="flex items-center gap-1 rounded-md border border-border bg-secondary/40 p-1">
             {tabs.map((t) => (
               <Link
                 key={t.to}
                 to={t.to}
                 activeOptions={{ exact: true }}
-                className="flex items-center gap-2 rounded-sm px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground data-[status=active]:bg-background data-[status=active]:text-foreground data-[status=active]:shadow-[inset_0_0_0_1px_hsl(var(--border))]"
+                className="flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground data-[status=active]:bg-background data-[status=active]:text-foreground data-[status=active]:shadow-[inset_0_0_0_1px_hsl(var(--border))]"
               >
                 <span className="font-mono text-[10px] text-primary">{t.code}</span>
                 {t.label}
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-3 font-mono text-xs">
+
+          {/* Search / command palette trigger */}
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="hidden h-8 flex-1 items-center gap-2.5 rounded-md border border-border bg-secondary/40 px-3 font-mono text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground lg:flex lg:max-w-xs"
+          >
+            <Search className="h-3.5 w-3.5 text-primary" />
+            <span className="flex-1 text-left">Jump to…</span>
+            <kbd className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px]">⌘K</kbd>
+          </button>
+          <button
+            onClick={() => setPaletteOpen(true)}
+            aria-label="Search"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-border bg-secondary/40 text-muted-foreground transition-colors hover:text-foreground lg:hidden"
+          >
+            <Search className="h-3.5 w-3.5" />
+          </button>
+
+          <div className="ml-auto flex items-center gap-3 font-mono text-xs lg:ml-0">
+            {/* Live vitals */}
+            <div className="hidden items-center gap-3 text-[11px] xl:flex">
+              <Vital icon={Activity} label="runs" value={String(pulse.activeRuns)} title="Active workflow runs" />
+              <Vital icon={Layers} label="queue" value={String(pulse.queue)} title="Tasks waiting for a workspace" />
+              <Vital icon={Zap} label="gw" value={`${pulse.latencyMs}ms`} title="Model gateway latency" />
+              <Vital icon={Timer} label="up" value={pulse.uptime} title="Hub uptime" />
+            </div>
+
+            {/* Clock */}
+            <span className="hidden items-center gap-1.5 rounded-md border border-border bg-secondary/40 px-2.5 py-1.5 text-[11px] text-muted-foreground md:flex">
+              <Clock3 className="h-3 w-3 text-primary" />
+              {pulse.clock}
+            </span>
+
+            <AlertsMenu events={pulse.events} />
+
             <span className="flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-3 py-1 text-success">
               <span className="h-1.5 w-1.5 rounded-full bg-success blink" /> HUB ONLINE
             </span>
-            <span className="hidden rounded-full border border-border bg-secondary/40 px-3 py-1 text-muted-foreground md:inline">
-              install: <span className="text-foreground">craton-01</span>
+          </div>
+        </div>
+
+        {/* Status strip: layer health + live event ticker */}
+        <div className="border-t border-border/60 bg-secondary/25">
+          <div className="mx-auto flex h-7 max-w-[1680px] items-center gap-4 px-5">
+            <div className="hidden shrink-0 items-center gap-3 md:flex">
+              {layers.map((l) => (
+                <span key={l.id} className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground/80" title={l.zone}>
+                  <span className={`h-1 w-1 rounded-full ${l.id === "exec" ? "bg-accent blink" : "bg-success"}`} />
+                  {l.label}
+                </span>
+              ))}
+            </div>
+            <div className="relative min-w-0 flex-1 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]">
+              <div className="marquee flex w-max items-center gap-8 whitespace-nowrap font-mono text-[10px] text-muted-foreground">
+                {[0, 1].map((copy) => (
+                  <span key={copy} className="flex items-center gap-8">
+                    {tickerLine.map((line, i) => (
+                      <span key={`${copy}-${i}`} className="flex items-center gap-2">
+                        <span className="text-primary">▸</span>
+                        {line}
+                      </span>
+                    ))}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <span className="hidden shrink-0 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground/60 sm:inline">
+              install: <span className="text-foreground/80">craton-01</span>
             </span>
           </div>
         </div>
       </header>
+
       <main className="mx-auto max-w-[1680px] px-5 py-5">{children}</main>
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </div>
   );
 }
