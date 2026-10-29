@@ -203,7 +203,7 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
                   {n.locked ? <Lock className="h-3.5 w-3.5" /> : <Icon className="h-3.5 w-3.5" />}
                 </div>
                 <div className="min-w-0">
-                  <div className="truncate text-[11px] font-medium leading-tight">{n.label}</div>
+                  <div className="line-clamp-2 text-[10.5px] font-medium leading-tight">{n.label}</div>
                   <div className="truncate font-mono text-[9px] text-muted-foreground">{lit ? "● active" : n.metric}</div>
                 </div>
               </div>
