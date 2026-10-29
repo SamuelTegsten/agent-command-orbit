@@ -189,10 +189,6 @@ export function FleetPanel() {
 
   const busy = nodes.filter((n) => n.status === "busy").length;
   const attention = nodes.filter(needsAttention).length;
-  const cores = nodes.reduce((a, n) => a + n.cores, 0);
-  const ram = nodes.reduce((a, n) => a + n.memGb, 0);
-  const totalRan = nodes.reduce((a, n) => a + n.ran, 0);
-  const totalFailed = nodes.reduce((a, n) => a + n.failed, 0);
 
   const shown = useMemo(() => {
     const f = nodes.filter((n) =>
