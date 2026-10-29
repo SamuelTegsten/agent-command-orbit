@@ -37,7 +37,7 @@ const initial: Msg[] = [
 ];
 
 function Factory() {
-  const [active, setActive] = useState(threads[0].id);
+  const [active, setActive] = useState(threads[0]!.id);
   const [msgs, setMsgs] = useState<Msg[]>(initial);
   const [draft, setDraft] = useState("");
   const [thinking, setThinking] = useState(false);

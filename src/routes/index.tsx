@@ -24,7 +24,7 @@ const hub = { x: 48, y: 50 };
 const nodePos = nodes.map((_, i) => ({ x: 82, y: 9 + i * 16.5 }));
 
 function Topology() {
-  const [selected, setSelected] = useState<string>(nodes[0].id);
+  const [selected, setSelected] = useState<string>(nodes[0]!.id);
   const node = nodes.find((n) => n.id === selected)!;
 
   return (
