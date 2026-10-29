@@ -256,7 +256,7 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
 
           {/* edges */}
           {gedges.map((e) => {
-            if (!visible[e.flow]) return null;
+            if (!visible[e.flow] || !geoms[e.id]) return null;
             const isActive = activeEdge?.id === e.id;
             const inTrail = trail.has(e.id);
             const dim = !connected(e);
