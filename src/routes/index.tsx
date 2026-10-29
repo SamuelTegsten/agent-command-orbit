@@ -75,14 +75,6 @@ function Monitor() {
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px] 2xl:grid-cols-[230px_minmax(0,1fr)_330px]">
       {/* Left: data overview */}
       <aside className="space-y-3 xl:col-span-2 2xl:col-span-1">
-        <div className="hidden 2xl:block">
-          <h1 className="text-[28px] font-bold leading-[1.05] tracking-tight">
-            Factory
-            <br />
-            Monitor
-          </h1>
-          <div className="mt-2 font-mono text-[11px] text-muted-foreground">{clock || "—"}</div>
-        </div>
         <div className="panel overflow-hidden">
           <div className="panel-head">Data overview</div>
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-1">

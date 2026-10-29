@@ -64,24 +64,25 @@ function Overview({ list, setList }: { list: Session[]; setList: (fn: (l: Sessio
     <div className="mx-auto max-w-[1400px] space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold">Factory</h1>
-          <p className="max-w-xl text-sm text-muted-foreground">The swarm builds the software. Give it a task, then keep steering the same session with new instructions; each builds on the last.</p>
+          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary">02 / Factory</div>
+          <h1 className="font-display text-xl font-bold">Sessions & instructions</h1>
+          <p className="max-w-xl text-xs text-muted-foreground">Give the swarm a task, then keep steering the same session. Each instruction builds on the last.</p>
         </div>
         <button onClick={() => newSession()} className="flex items-center gap-1.5 rounded-sm bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground glow-primary hover:opacity-90"><Plus className="h-4 w-4" /> New session</button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((t) => (
-          <div key={t.k} className="panel p-4">
+          <div key={t.k} className="panel p-3">
             <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground"><t.icon className="h-3 w-3 text-primary" />{t.k}</div>
-            <div className="mt-1 font-display text-3xl font-bold">{t.v}</div>
+            <div className="mt-1 font-display text-2xl font-bold">{t.v}</div>
             <div className="text-xs text-muted-foreground">{t.f}</div>
           </div>
         ))}
       </div>
 
-      <section className="panel p-4">
-        <div className="mb-3 flex items-baseline gap-2"><h2 className="flex items-center gap-2 font-display text-base font-bold"><Zap className="h-4 w-4 text-primary" />Performance</h2><span className="text-xs text-muted-foreground">last 7 days</span></div>
+      <section className="panel p-3">
+        <div className="mb-3 flex items-baseline gap-2"><h2 className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.2em]"><Zap className="h-4 w-4 text-primary" />Performance</h2><span className="text-xs text-muted-foreground">last 7 days</span></div>
         <div className="grid gap-3 md:grid-cols-3">
           {[
             { icon: Clock, k: "Median lead time", v: performance.leadTime, f: `p90 ${performance.p90}` },
@@ -98,8 +99,8 @@ function Overview({ list, setList }: { list: Session[]; setList: (fn: (l: Sessio
       </section>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="panel p-4">
-          <div className="mb-3 flex items-baseline gap-2"><h2 className="font-display text-base font-bold">Sessions</h2><span className="text-xs text-muted-foreground">{visible.length} sessions · {working} working · {list.length - visible.length} archived</span></div>
+        <section className="panel p-3">
+          <div className="mb-3 flex items-baseline gap-2"><h2 className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em]">Sessions</h2><span className="text-xs text-muted-foreground">{visible.length} sessions · {working} working · {list.length - visible.length} archived</span></div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {visible.map((x) => (
               <Link key={x.id} to="/factory" search={{ s: x.id }} className={`group flex flex-col rounded-sm border bg-background/50 p-3 transition-colors hover:border-primary/60 ${x.status === "working" ? "border-primary/60" : "border-border"}`}>
@@ -117,8 +118,8 @@ function Overview({ list, setList }: { list: Session[]; setList: (fn: (l: Sessio
           </div>
         </section>
 
-        <section className="panel p-4">
-          <div className="mb-3 flex items-baseline gap-2"><h2 className="flex items-center gap-2 font-display text-base font-bold"><Target className="h-4 w-4 text-primary" />Issues</h2><span className="text-xs text-muted-foreground">this checkout's GitLab project</span></div>
+        <section className="panel p-3">
+          <div className="mb-3 flex items-baseline gap-2"><h2 className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.2em]"><Target className="h-4 w-4 text-primary" />Issues</h2><span className="text-xs text-muted-foreground">this checkout's GitLab project</span></div>
           <div className="flex gap-2">
             <input value={project} onChange={(e) => setProject(e.target.value)} placeholder="group/project (optional)" className="min-w-0 flex-1 rounded-sm border border-input bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary" />
             <button onClick={() => setIssueOpen(true)} className="rounded-sm border border-border px-3 text-xs hover:border-primary">Show open issues</button>

@@ -7,9 +7,9 @@ const toneDot: Record<SetupCard["tone"], string> = { ok: "bg-success", warn: "bg
 export function SetupGrid() {
   const [open, setOpen] = useState<string | null>(null);
   return (
-    <section className="panel p-4">
+    <section className="panel p-3">
       <div className="mb-3 flex items-baseline gap-2">
-        <h2 className="font-display text-base font-bold">Setup</h2>
+        <h2 className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em]">Setup</h2>
         <span className="text-xs text-muted-foreground">install health at a glance</span>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -91,9 +91,9 @@ export function FleetPanel() {
     { icon: Boxes, k: "Sandbox", v: String(sandbox.active), s: "running", f: `${sandbox.programs} programs · ${sandbox.calls} calls · ${sandbox.waiting} waiting` },
   ];
   return (
-    <section className="panel p-4">
+    <section className="panel p-3">
       <div className="mb-3 flex flex-wrap items-baseline gap-2">
-        <h2 className="flex items-center gap-2 font-display text-base font-bold"><Cpu className="h-4 w-4 text-primary" /> Nodes</h2>
+        <h2 className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.2em]"><Cpu className="h-4 w-4 text-primary" /> Nodes</h2>
         <span className="text-xs text-muted-foreground">{fleet.length - busy} idle · {fleet.length} nodes · {cores} cores</span>
         <span className="ml-auto font-mono text-xs">fleet busy {Math.round((busy / fleet.length) * 100)}%</span>
       </div>
