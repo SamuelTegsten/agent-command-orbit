@@ -1,4 +1,2 @@
-- [x] Topology upgrade
-- [x] Apply Basalt brand
-- [x] Full system node map
-- [x] Merge Topology + Operations into one clean page (match reference image); keep Factory page
+- [x] Factory rework
+- [x] Factory chat as Lovable-style left side panel
