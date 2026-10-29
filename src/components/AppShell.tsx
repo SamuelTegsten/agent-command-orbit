@@ -43,12 +43,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-12 max-w-[1680px] items-stretch px-5">
           {/* Brand */}
           <Link to="/" className="flex shrink-0 items-center gap-2.5 border-r border-border pr-5">
-            <div className="hex grid h-6 w-7 place-items-center bg-primary/90">
-              <div className="hex h-2.5 w-3 bg-background" />
-            </div>
-            <div className="flex items-baseline gap-2 leading-none">
-              <span className="font-display text-[15px] font-bold tracking-[0.08em]">BASALT</span>
-              <span className="hidden font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground sm:inline">/ factory</span>
+            <svg viewBox="0 0 24 24" className="h-6 w-6 text-primary" aria-hidden="true">
+              <rect x="1.5" y="1.5" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M1.5 8.5 L22.5 8.5" stroke="currentColor" strokeWidth="1" opacity="0.35" />
+              <path d="M5 18.5 L9.5 11 L13 15 L15.5 12 L19 18.5 Z" fill="currentColor" />
+              <rect x="15.5" y="4" width="3" height="2" fill="currentColor" />
+            </svg>
+            <div className="flex items-baseline gap-1.5 leading-none">
+              <span className="font-display text-[15px] font-bold tracking-[0.04em] lowercase">craton</span>
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">ai</span>
             </div>
           </Link>
 
