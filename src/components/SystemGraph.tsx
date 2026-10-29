@@ -5,7 +5,7 @@ import { SectionLabel } from "@/components/AppShell";
 
 const W = 160;
 const H = 100;
-const NW = 15; // node width (canvas units)
+const NW = 17; // node width (canvas units)
 const NH = 9;
 
 const flowStroke: Record<Flow, string> = {
@@ -167,10 +167,10 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
           const n = byId[activeEdge.to]!;
           const left = n.x > 120;
           return (
-            <div key={`c-${step}`} className="fade-in pointer-events-none absolute z-10 w-[150px]" style={{ left: `${((n.x + (left ? -NW / 2 - 1 : NW / 2 + 1)) / W) * 100}%`, top: `${((n.y - NH / 2) / H) * 100}%`, transform: left ? "translateX(-100%) translateY(-100%)" : "translateY(-100%)" }}>
+            <div key={`c-${step}`} className="fade-in pointer-events-none absolute z-10 w-[180px]" style={{ left: `${((n.x + (left ? -NW / 2 - 1 : NW / 2 + 1)) / W) * 100}%`, top: `${((n.y - NH / 2) / H) * 100}%`, transform: left ? "translateX(-100%) translateY(-100%)" : "translateY(-100%)" }}>
               <div className="rounded-t-sm bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground">{n.label}</div>
               <div className="space-y-0.5 rounded-b-sm border border-primary/50 bg-background/90 px-2 py-1.5 font-mono text-[10px]">
-                <div className="flex justify-between"><span className="text-muted-foreground">Incoming</span><span>{activeEdge.label}</span></div>
+                <div className="flex justify-between"><span className="mr-2 text-muted-foreground">Incoming</span><span>{activeEdge.label}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">From</span><span>{byId[activeEdge.from]!.label}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Now</span><span>{n.metric}</span></div>
               </div>

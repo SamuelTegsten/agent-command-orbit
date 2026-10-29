@@ -70,10 +70,10 @@ function Monitor() {
   };
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[230px_minmax(0,1fr)_330px]">
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px] 2xl:grid-cols-[230px_minmax(0,1fr)_330px]">
       {/* Left: data overview */}
-      <aside className="space-y-3">
-        <div className="hidden xl:block">
+      <aside className="space-y-3 xl:col-span-2 2xl:col-span-1">
+        <div className="hidden 2xl:block">
           <h1 className="text-[28px] font-bold leading-[1.05] tracking-tight">
             Factory
             <br />
@@ -83,9 +83,9 @@ function Monitor() {
         </div>
         <div className="panel overflow-hidden">
           <div className="bg-secondary px-3 py-2 text-xs font-semibold tracking-wide">Data overview</div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-1">
             {kpis.map((x) => (
-              <div key={x.k} className="border-t border-border px-3 py-3">
+              <div key={x.k} className="border-t border-border px-3 py-3 xl:border-l 2xl:border-l-0">
                 <div className="flex items-baseline gap-1.5">
                   <span className="font-mono text-2xl font-semibold">{x.v}</span>
                   <span className="text-[11px] text-muted-foreground">{x.unit}</span>
