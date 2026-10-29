@@ -58,7 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={t.to}
                 to={t.to}
-                activeOptions={{ exact: true }}
+                activeOptions={{ exact: true, includeSearch: false }}
                 className="group relative flex items-center gap-2 border-r border-border px-5 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:bg-secondary/40 hover:text-foreground data-[status=active]:bg-secondary/50 data-[status=active]:text-foreground"
               >
                 <span className="absolute inset-x-0 top-0 h-[2px] bg-primary opacity-0 transition-opacity group-data-[status=active]:opacity-100" />
