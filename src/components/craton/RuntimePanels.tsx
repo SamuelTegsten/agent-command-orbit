@@ -16,7 +16,7 @@ export function SetupGrid() {
         {setup.map((c) => {
           const isOpen = open === c.key;
           return (
-            <div key={c.key} className={`rounded-md border bg-background/50 p-3 ${c.tone === "bad" ? "border-destructive/60" : "border-border"}`}>
+            <div key={c.key} className={`rounded-sm border bg-background/50 p-3 ${c.tone === "bad" ? "border-destructive/60" : "border-border"}`}>
               <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                 <span className={`h-1.5 w-1.5 rounded-full ${toneDot[c.tone]}`} />{c.label}
               </div>
@@ -51,16 +51,16 @@ function Bar({ v, max = 100, warn = false }: { v: number; max?: number; warn?: b
 function NodeCard({ n }: { n: FleetNode }) {
   const busy = n.status === "busy";
   return (
-    <div className={`rounded-md border bg-background/50 p-3 ${busy ? "border-primary/60 glow-primary" : "border-border"}`}>
+    <div className={`rounded-sm border bg-background/50 p-3 ${busy ? "border-primary/60 glow-primary" : "border-border"}`}>
       <div className="flex items-start gap-2">
-        <span className={`mt-0.5 grid h-6 w-6 place-items-center rounded-full border ${busy ? "border-primary" : "border-success/50"}`}>
+        <span className={`mt-0.5 grid h-6 w-6 place-items-center rounded-sm border ${busy ? "border-primary" : "border-success/50"}`}>
           <span className={`h-2.5 w-2.5 rounded-full ${busy ? "bg-primary blink" : "bg-success"}`} />
         </span>
         <div className="min-w-0 flex-1">
           <div className="font-mono text-sm font-semibold">{n.id}</div>
           <div className="font-mono text-[10px] text-muted-foreground">{n.cores} cores · {n.memGb} GB · {n.flavor}</div>
         </div>
-        <span className={`rounded-full border px-2 py-0.5 font-mono text-[10px] ${busy ? "border-primary/40 text-primary" : "border-success/30 text-success"}`}>● {n.status}</span>
+        <span className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] ${busy ? "border-primary/40 text-primary" : "border-success/30 text-success"}`}>● {n.status}</span>
       </div>
       <div className="mt-2 rounded-sm border border-border/60 bg-secondary/30 px-2 py-1.5 text-[11px]">
         <div className="font-medium">{busy ? "Working" : `Idle ${n.idleFor}`}</div>
@@ -99,7 +99,7 @@ export function FleetPanel() {
       </div>
       <div className="mb-3 grid gap-3 md:grid-cols-3">
         {tiles.map((t) => (
-          <div key={t.k} className="rounded-md border border-border bg-background/50 p-3">
+          <div key={t.k} className="rounded-sm border border-border bg-background/50 p-3">
             <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground"><t.icon className="h-3 w-3 text-primary" />{t.k}</div>
             <div className="mt-1 flex items-baseline gap-1.5"><span className="font-display text-2xl font-bold">{t.v}</span><span className="text-xs text-muted-foreground">{t.s}</span></div>
             <div className="text-[11px] text-muted-foreground">{t.f}</div>

@@ -32,7 +32,7 @@ export function StackedView({ topo, onPick }: { topo: Topo; onPick: (s: Selectio
       </div>
       <div className="mx-auto h-6 w-px bg-primary" />
       {hosts.map((h) => (
-        <div key={h.id} className="rounded-md border border-border/70 bg-secondary/30 p-2">
+        <div key={h.id} className="rounded-sm border border-border/70 bg-secondary/30 p-2">
           <div className="px-1 pb-1.5 font-mono text-[10px] text-muted-foreground">{h.id}</div>
           <div className="space-y-1.5">
             {nodes.filter((n) => n.host === h.id).map((n) => (

@@ -129,7 +129,7 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
 
   return (
     <div className={compact ? "relative" : "panel overflow-hidden"}>
-      <div className={compact ? "absolute bottom-3 left-3 z-20 flex flex-wrap items-center gap-1.5 rounded-md border border-border bg-background/80 p-1.5 backdrop-blur" : "flex flex-wrap items-end justify-between gap-3 border-b border-border px-5 py-4"}>
+      <div className={compact ? "absolute bottom-3 left-3 z-20 flex flex-wrap items-center gap-1.5 rounded-sm border border-border bg-background/80 p-1.5 backdrop-blur" : "flex flex-wrap items-end justify-between gap-3 border-b border-border px-5 py-4"}>
         {!compact && (
           <div>
             <SectionLabel>{subtitle}</SectionLabel>
@@ -167,20 +167,20 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
         onClickCapture={(e) => { if (drag.current?.moved) { e.stopPropagation(); e.preventDefault(); } }}
       >
         {/* zoom controls */}
-        <div className="absolute right-3 top-3 z-30 flex flex-col overflow-hidden rounded-md border border-border bg-background/85 backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
+        <div className="absolute right-3 top-3 z-30 flex flex-col overflow-hidden rounded-sm border border-border bg-background/85 backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
           <button onClick={() => zoomCenter(1.25)} className="px-2.5 py-1.5 text-sm hover:bg-secondary" aria-label="Zoom in">+</button>
           <button onClick={() => zoomCenter(0.8)} className="border-t border-border px-2.5 py-1.5 text-sm hover:bg-secondary" aria-label="Zoom out">−</button>
           <button onClick={() => setView({ z: 1, x: 0, y: 0 })} className="border-t border-border px-1 py-1.5 font-mono text-[9px] hover:bg-secondary" aria-label="Reset view">{Math.round(view.z * 100)}%</button>
         </div>
         {hE && (
-          <div className="pointer-events-none absolute left-3 top-3 z-30 rounded-md border border-primary/50 bg-background/90 px-2.5 py-1.5 font-mono text-[10px]">
+          <div className="pointer-events-none absolute left-3 top-3 z-30 rounded-sm border border-primary/50 bg-background/90 px-2.5 py-1.5 font-mono text-[10px]">
             <span className="text-primary">{byId[hE.from]!.label}</span> → <span className="text-primary">{byId[hE.to]!.label}</span>
             <div className="text-muted-foreground">{hE.label} · {flowLabel[hE.flow]}</div>
           </div>
         )}
         {/* docked "now happening" card — stays put while the flow moves */}
         {activeEdge && (
-          <div className="pointer-events-none absolute bottom-3 right-3 z-30 w-[230px] overflow-hidden rounded-md border border-border bg-background/90 shadow-lg backdrop-blur">
+          <div className="pointer-events-none absolute bottom-3 right-3 z-30 w-[230px] overflow-hidden rounded-sm border border-border bg-background/90 shadow-lg backdrop-blur">
             <div className="flex items-center justify-between border-b border-border px-2.5 py-1.5">
               <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">Now happening</span>
               <span className="font-mono text-[9px] text-muted-foreground">{step + 1}/{scenario.length}</span>
@@ -289,9 +289,9 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
               className={`absolute -translate-x-1/2 -translate-y-1/2 text-left transition-all duration-300 ${dim ? "opacity-25" : ""}`}
               style={{ left: `${(n.x / W) * 100}%`, top: `${(n.y / H) * 100}%`, width: `${(NW / W) * 100}%`, height: `${(NH / H) * 100}%` }}
             >
-              {lit && <span className="pointer-events-none absolute -inset-1.5 rounded-md border border-primary/60 ping-soft" />}
+              {lit && <span className="pointer-events-none absolute -inset-1.5 rounded-sm border border-primary/60 ping-soft" />}
               <div
-                className={`relative flex h-full items-center gap-2 rounded-md border px-2 backdrop-blur transition-all duration-300 ${
+                className={`relative flex h-full items-center gap-2 rounded-sm border px-2 backdrop-blur transition-all duration-300 ${
                   n.locked ? "border-destructive/40 bg-destructive/5" : lit ? "border-primary bg-primary/15 glow-primary" : isSel ? "border-accent bg-card glow-accent" : "border-border bg-card/90 hover:border-muted-foreground"
                 }`}
               >

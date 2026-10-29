@@ -88,7 +88,7 @@ function Overview({ list, setList }: { list: Session[]; setList: (fn: (l: Sessio
             { icon: GitMerge, k: "Merge success", v: performance.mergeSuccess, f: `${performance.merges} merges, ${performance.mergeFailed} failed` },
             { icon: AlertTriangle, k: "Failures", v: String(performance.failures), f: performance.failures ? "see sessions" : "none" },
           ].map((t) => (
-            <div key={t.k} className="rounded-md border border-border border-t-success/50 bg-background/50 p-3">
+            <div key={t.k} className="rounded-sm border border-border border-t-success/50 bg-background/50 p-3">
               <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground"><t.icon className="h-3 w-3" />{t.k}</div>
               <div className="mt-1 font-display text-2xl font-bold">{t.v}</div>
               <div className="text-xs text-muted-foreground">{t.f}</div>
@@ -102,7 +102,7 @@ function Overview({ list, setList }: { list: Session[]; setList: (fn: (l: Sessio
           <div className="mb-3 flex items-baseline gap-2"><h2 className="font-display text-base font-bold">Sessions</h2><span className="text-xs text-muted-foreground">{visible.length} sessions · {working} working · {list.length - visible.length} archived</span></div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {visible.map((x) => (
-              <Link key={x.id} to="/factory" search={{ s: x.id }} className={`group flex flex-col rounded-md border bg-background/50 p-3 transition-colors hover:border-primary/60 ${x.status === "working" ? "border-primary/60" : "border-border"}`}>
+              <Link key={x.id} to="/factory" search={{ s: x.id }} className={`group flex flex-col rounded-sm border bg-background/50 p-3 transition-colors hover:border-primary/60 ${x.status === "working" ? "border-primary/60" : "border-border"}`}>
                 <div className="flex items-start gap-2 text-sm font-semibold"><span className={`mt-1.5 h-2 w-2 shrink-0 rounded-sm ${dot[x.status]}`} /><span className="line-clamp-2">{x.title}</span></div>
                 <div className="mt-2 flex flex-wrap gap-1.5 font-mono text-[10.5px]">
                   <span className={`rounded-sm border border-border bg-secondary/50 px-2 py-0.5 ${statusStyle[x.status]}`}>● {x.status}</span>
@@ -120,13 +120,13 @@ function Overview({ list, setList }: { list: Session[]; setList: (fn: (l: Sessio
         <section className="panel p-4">
           <div className="mb-3 flex items-baseline gap-2"><h2 className="flex items-center gap-2 font-display text-base font-bold"><Target className="h-4 w-4 text-primary" />Issues</h2><span className="text-xs text-muted-foreground">this checkout's GitLab project</span></div>
           <div className="flex gap-2">
-            <input value={project} onChange={(e) => setProject(e.target.value)} placeholder="group/project (optional)" className="min-w-0 flex-1 rounded-md border border-input bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary" />
-            <button onClick={() => setIssueOpen(true)} className="rounded-md border border-border px-3 text-xs hover:border-primary">Show open issues</button>
+            <input value={project} onChange={(e) => setProject(e.target.value)} placeholder="group/project (optional)" className="min-w-0 flex-1 rounded-sm border border-input bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary" />
+            <button onClick={() => setIssueOpen(true)} className="rounded-sm border border-border px-3 text-xs hover:border-primary">Show open issues</button>
           </div>
           {issueOpen ? (
             <ul className="mt-3 space-y-2">
               {issues.map((i) => (
-                <li key={i.iid} className="flex items-center gap-2 rounded-md border border-border bg-background/50 p-2 text-sm">
+                <li key={i.iid} className="flex items-center gap-2 rounded-sm border border-border bg-background/50 p-2 text-sm">
                   <span className="font-mono text-[11px] text-muted-foreground">#{i.iid}</span>
                   <span className="min-w-0 flex-1 truncate">{i.title}</span>
                   <button onClick={() => newSession(i.title)} className="rounded-sm bg-primary/15 px-2 py-0.5 text-[11px] text-primary hover:bg-primary/25">Adopt</button>
@@ -134,7 +134,7 @@ function Overview({ list, setList }: { list: Session[]; setList: (fn: (l: Sessio
               ))}
             </ul>
           ) : (
-            <div className="mt-3 grid place-items-center gap-2 rounded-md border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+            <div className="mt-3 grid place-items-center gap-2 rounded-sm border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
               <CircleDot className="h-4 w-4" />Show the open issues of a GitLab project and adopt one as a session.
             </div>
           )}
@@ -235,7 +235,7 @@ function SessionView({ session: x, update }: { session: Session; update: (id: st
 
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_400px]">
         <section className="panel flex h-[calc(100vh-15rem)] min-h-[520px] flex-col">
-          <div className="m-3 rounded-md border border-border bg-background/60 p-3">
+          <div className="m-3 rounded-sm border border-border bg-background/60 p-3">
             <div className="flex justify-between">
               <span className="flex items-center gap-2 text-sm font-semibold"><span className={`h-2 w-2 rounded-sm ${dot[x.status]}`} />{x.status === "failed" ? "Cancelled" : x.status === "working" ? `Working · ${x.stage ?? ""}` : "Ready for instructions"}</span>
               <span className="font-mono text-xs text-muted-foreground">{x.cost}</span>
@@ -252,7 +252,7 @@ function SessionView({ session: x, update }: { session: Session; update: (id: st
             {items.map((t, i) =>
               t.kind === "instruction" ? (
                 <div key={i} className="ml-auto max-w-[85%] fade-in">
-                  <div className="rounded-md border border-primary/50 bg-primary/5 px-3 py-2 text-sm">{t.text}</div>
+                  <div className="rounded-sm border border-primary/50 bg-primary/5 px-3 py-2 text-sm">{t.text}</div>
                   <div className="mt-1 text-right font-mono text-[10px] text-muted-foreground">#{t.n} · {t.mode === "quickfix" ? "quick fix · " : ""}{t.ago}</div>
                 </div>
               ) : (
@@ -262,7 +262,7 @@ function SessionView({ session: x, update }: { session: Session; update: (id: st
                   </span>
                   <div className="min-w-0">
                     <span className={`rounded-sm px-1.5 py-0.5 font-mono text-[10px] ${tlIcon[t.kind].cls}`}>{tlIcon[t.kind].label}</span>
-                    <div className={`mt-1 whitespace-pre-wrap rounded-md border px-3 py-1.5 text-sm ${t.kind === "failed" ? "border-destructive/60" : "border-border"} bg-background/50`}>{t.text}</div>
+                    <div className={`mt-1 whitespace-pre-wrap rounded-sm border px-3 py-1.5 text-sm ${t.kind === "failed" ? "border-destructive/60" : "border-border"} bg-background/50`}>{t.text}</div>
                     <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">{t.ago}</div>
                   </div>
                 </div>
@@ -273,7 +273,7 @@ function SessionView({ session: x, update }: { session: Session; update: (id: st
           <div className="space-y-2 border-t border-border p-3">
             <textarea value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(); } }} rows={2}
               placeholder="Tell the factory what to do next. It builds on everything this session has done."
-              className="w-full resize-none rounded-md border border-input bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary" />
+              className="w-full resize-none rounded-sm border border-input bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary" />
             <div className="flex flex-wrap items-center gap-2 text-xs">
               {([["instruction", "Instruction"], ["quickfix", "⚡ Quick fix"]] as const).map(([k, l]) => (
                 <button key={k} onClick={() => setMode(k)} className={`rounded-sm px-2.5 py-1 ${mode === k ? "border border-primary/60 text-primary" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
@@ -282,7 +282,7 @@ function SessionView({ session: x, update }: { session: Session; update: (id: st
               <span className="hidden text-muted-foreground md:inline">Ctrl+Enter sends</span>
               <button onClick={send} disabled={!draft.trim() || x.status === "working"} className="ml-auto rounded-sm bg-primary px-4 py-1 font-medium text-primary-foreground disabled:opacity-40">Send</button>
             </div>
-            <input value={ask} onChange={(e) => setAsk(e.target.value)} onKeyDown={(e) => e.key === "Enter" && askClaude()} placeholder="Ask Claude about this session…" className="w-full rounded-md border border-input bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary" />
+            <input value={ask} onChange={(e) => setAsk(e.target.value)} onKeyDown={(e) => e.key === "Enter" && askClaude()} placeholder="Ask Claude about this session…" className="w-full rounded-sm border border-input bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary" />
           </div>
         </section>
 
@@ -304,7 +304,7 @@ function SessionView({ session: x, update }: { session: Session; update: (id: st
               </div>
               <div className="grid grid-cols-4 gap-2">
                 {(Object.entries(counts) as [string, number][]).map(([k, v]) => (
-                  <div key={k} className="rounded-md border border-border bg-background/50 p-2">
+                  <div key={k} className="rounded-sm border border-border bg-background/50 p-2">
                     <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">{k}</div>
                     <div className={`font-display text-xl font-bold ${k === "failed" && v ? "text-destructive" : ""}`}>{v}</div>
                   </div>

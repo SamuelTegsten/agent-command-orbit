@@ -29,13 +29,13 @@ export function AlertsMenu({ events }: { events: PulseEvent[] }) {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="System alerts"
-        className={`relative grid h-8 w-8 place-items-center rounded-md border transition-colors ${
+        className={`relative grid h-8 w-8 place-items-center rounded-sm border transition-colors ${
           open ? "border-primary/50 bg-primary/10 text-primary" : "border-border bg-secondary/40 text-muted-foreground hover:text-foreground"
         }`}
       >
         <Bell className="h-3.5 w-3.5" />
         {unread > 0 && (
-          <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 font-mono text-[9px] font-bold text-primary-foreground">
+          <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-sm bg-primary px-1 font-mono text-[9px] font-bold text-primary-foreground">
             {unread}
           </span>
         )}
