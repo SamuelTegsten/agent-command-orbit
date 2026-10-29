@@ -7,7 +7,7 @@ import { SectionLabel } from "@/components/AppShell";
 
 const W = 160;
 const H = 100;
-const NW = 17; // node width (canvas units)
+const NW = 20; // node width (canvas units)
 const NH = 9;
 
 const flowStroke: Record<Flow, string> = {
@@ -182,7 +182,7 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
         )}
         {/* docked "now happening" card — stays put while the flow moves */}
         {activeEdge && (
-          <div className="pointer-events-none absolute bottom-3 right-3 z-30 w-[230px] overflow-hidden rounded-sm border border-border bg-background/90 shadow-lg backdrop-blur">
+          <div className="pointer-events-none absolute right-16 top-3 z-30 w-[230px] overflow-hidden rounded-sm border border-border bg-background/90 shadow-lg backdrop-blur">
             <div className="flex items-center justify-between border-b border-border px-2.5 py-1.5">
               <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">Now happening</span>
               <span className="font-mono text-[9px] text-muted-foreground">{step + 1}/{scenario.length}</span>
@@ -290,7 +290,6 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
               className={`absolute -translate-x-1/2 -translate-y-1/2 text-left transition-all duration-300 ${dim ? "opacity-25" : ""}`}
               style={{ left: `${(n.x / W) * 100}%`, top: `${(n.y / H) * 100}%`, width: `${(NW / W) * 100}%`, height: `${(NH / H) * 100}%` }}
             >
-              {lit && <span className="pointer-events-none absolute -inset-1.5 rounded-sm border border-primary/60 ping-soft" />}
               <div className={`relative flex h-full items-center gap-1.5 rounded-sm px-1 transition-all duration-300 ${isSel && !lit ? "bg-secondary/60" : "hover:bg-secondary/40"}`}>
                 <div className={`relative grid aspect-square h-full shrink-0 place-items-center rounded-full border transition-colors ${
                   n.locked ? "border-destructive/50 bg-destructive/10 text-destructive" : lit ? "border-primary bg-primary/15 text-primary glow-primary" : isSel ? "border-accent bg-card text-accent" : "border-border bg-card/90 text-accent"}`}>
