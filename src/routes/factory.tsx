@@ -9,7 +9,7 @@ import { issues, performance, sessions as seed, stages, type Session, type Timel
 type Search = { s?: string };
 
 export const Route = createFileRoute("/factory")({
-  validateSearch: (q: Record<string, unknown>): Search => (typeof q.s === "string" ? { s: q.s } : {}),
+  validateSearch: (q: Record<string, unknown>): Search => (typeof q["s"] === "string" ? { s: q["s"] } : {}),
   head: () => ({
     meta: [
       { title: "Factory · Basalt Software Factory" },
