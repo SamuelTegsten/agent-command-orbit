@@ -6,9 +6,9 @@ import { SectionLabel, StatusDot } from "@/components/AppShell";
 export const Route = createFileRoute("/operations")({
   head: () => ({
     meta: [
-      { title: "Operations · Software Factory" },
+      { title: "Operations · Basalt Software Factory" },
       { name: "description", content: "Every moving part of the factory, live: workflows, policy checks, models and workspaces." },
-      { property: "og:title", content: "Operations · Software Factory" },
+      { property: "og:title", content: "Operations · Basalt Software Factory" },
       { property: "og:description", content: "Every moving part of the factory, live." },
     ],
   }),

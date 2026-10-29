@@ -1,215 +1,103 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Monitor, Laptop, Server, Terminal, Cpu, ShieldCheck, Workflow, KeyRound, Network } from "lucide-react";
-import { clients, nodes } from "@/lib/mock";
-import { SectionLabel, StatusDot } from "@/components/AppShell";
+import { clients } from "@/lib/mock";
+import { SectionLabel } from "@/components/AppShell";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { useTopology, type Selection } from "@/components/topology/useTopology";
+import { TopologyCanvas } from "@/components/topology/TopologyCanvas";
+import { DetailPanel } from "@/components/topology/DetailPanel";
+import { Toolbar } from "@/components/topology/Toolbar";
+import { StackedView } from "@/components/topology/StackedView";
+import { Sparkline } from "@/components/topology/Sparkline";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Topology · Software Factory" },
-      { name: "description", content: "Live map of client machines, the central hub and agent nodes." },
-      { property: "og:title", content: "Topology · Software Factory" },
-      { property: "og:description", content: "Live map of client machines, the central hub and agent nodes." },
+      { title: "Topology · Basalt Software Factory" },
+      { name: "description", content: "Live map of client machines, the central hub, agent nodes and models." },
+      { property: "og:title", content: "Topology · Basalt Software Factory" },
+      { property: "og:description", content: "Live map of client machines, the central hub, agent nodes and models." },
     ],
   }),
   component: Topology,
 });
 
-const kindIcon = { Workstation: Monitor, Laptop, Service: Server, Terminal } as const;
-
-// Positions in % of the canvas
-const clientPos = clients.map((_, i) => ({ x: 13, y: 14 + i * 24 }));
-const hub = { x: 48, y: 50 };
-const nodePos = nodes.map((_, i) => ({ x: 82, y: 9 + i * 16.5 }));
-
 function Topology() {
-  const [selected, setSelected] = useState<string>(nodes[0]!.id);
-  const node = nodes.find((n) => n.id === selected)!;
+  const topo = useTopology();
+  const [sheet, setSheet] = useState(false);
+  const { nodes, health, ticker } = topo;
+  const last = (a: number[]) => a[a.length - 1] ?? 0;
+
+  const tiles = [
+    { k: "Clients", v: String(clients.length), d: null, c: "" },
+    { k: "Agents busy", v: `${nodes.filter((n) => n.status === "busy").length}/${nodes.length}`, d: null, c: "" },
+    { k: "Hub latency", v: `${Math.round(last(health.latency))} ms`, d: health.latency, c: "stroke-accent" },
+    { k: "Tasks / hour", v: String(Math.round(last(health.tasks))), d: health.tasks, c: "stroke-primary" },
+    { k: "Tokens / min", v: `${Math.round(last(health.tokens))}k`, d: health.tokens, c: "stroke-chart-5" },
+    { k: "Policy denials", v: String(Math.round(last(health.denials))), d: health.denials, c: "stroke-destructive" },
+  ];
+
+  const pickMobile = (s: Selection) => {
+    topo.setSelection(s);
+    setSheet(true);
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <SectionLabel>01 / Topology</SectionLabel>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight">Clients → Hub → Nodes</h1>
-        </div>
-        <div className="flex gap-3">
-          {[
-            ["Clients", clients.length],
-            ["Nodes", nodes.length],
-            ["Active agents", nodes.filter((n) => n.status === "busy").length],
-            ["Warm pool", nodes.filter((n) => n.status === "idle").length],
-          ].map(([k, v]) => (
-            <div key={k} className="panel px-4 py-2">
-              <div className="font-mono text-2xl text-primary">{v}</div>
-              <div className="text-xs text-muted-foreground">{k}</div>
-            </div>
-          ))}
-        </div>
+    <div className="space-y-5">
+      <div>
+        <SectionLabel>01 / Topology</SectionLabel>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight">Clients → Hub → Nodes</h1>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
-        <div className="panel relative aspect-[16/10] min-h-[560px] overflow-hidden">
-          <div className="absolute left-4 top-3 font-mono text-[10px] text-muted-foreground">CLIENTS</div>
-          <div className="absolute left-1/2 top-3 -translate-x-1/2 font-mono text-[10px] text-muted-foreground">HUB · CONTROL PLANE</div>
-          <div className="absolute right-4 top-3 font-mono text-[10px] text-muted-foreground">NODES · AGENT WORKSPACES</div>
-
-          <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            {clientPos.map((p, i) => (
-              <path
-                key={i}
-                d={`M ${p.x + 9} ${p.y} C ${p.x + 22} ${p.y}, ${hub.x - 16} ${hub.y}, ${hub.x - 8} ${hub.y}`}
-                fill="none"
-                vectorEffect="non-scaling-stroke"
-                className={clients[i]!.status === "idle" ? "stroke-border" : "stroke-accent flow-dash"}
-                strokeWidth={1.5}
-              />
-            ))}
-            {nodePos.map((p, i) => {
-              const n = nodes[i]!;
-              const cls =
-                n.status === "busy" ? "stroke-primary flow-dash" : n.status === "error" ? "stroke-destructive flow-dash" : n.status === "paused" ? "stroke-accent" : "stroke-border";
-              return (
-                <path
-                  key={n.id}
-                  d={`M ${hub.x + 8} ${hub.y} C ${hub.x + 18} ${hub.y}, ${p.x - 18} ${p.y}, ${p.x - 9} ${p.y}`}
-                  fill="none"
-                  vectorEffect="non-scaling-stroke"
-                  className={cls}
-                  strokeWidth={selected === n.id ? 2.5 : 1.5}
-                />
-              );
-            })}
-          </svg>
-
-          {clients.map((c, i) => {
-            const Icon = kindIcon[c.kind as keyof typeof kindIcon];
-            return (
-              <div key={c.id} className="absolute w-[17%] -translate-x-1/2 -translate-y-1/2" style={{ left: `${clientPos[i]!.x}%`, top: `${clientPos[i]!.y}%` }}>
-                <div className="panel flex items-center gap-3 p-3">
-                  <Icon className="h-5 w-5 text-accent" />
-                  <div className="min-w-0">
-                    <div className="truncate font-mono text-xs">{c.name}</div>
-                    <div className="truncate text-[11px] text-muted-foreground">{c.user} · {c.sessions} sess</div>
-                  </div>
-                  <span className="ml-auto"><StatusDot status={c.status} /></span>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* HUB */}
-          <div className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${hub.x}%`, top: `${hub.y}%` }}>
-            <div className="relative">
-              <div className="absolute -inset-6 rounded-full border border-primary/30 blink" />
-              <div className="absolute -inset-12 rounded-full border border-primary/10" />
-              <div className="panel relative w-56 border-primary/60 p-4 glow-primary">
-                <div className="flex items-center gap-2">
-                  <Network className="h-5 w-5 text-primary" />
-                  <span className="font-semibold tracking-wide">HUB</span>
-                  <span className="ml-auto font-mono text-[10px] text-success">● LIVE</span>
-                </div>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  {[
-                    [Workflow, "Orchestration"],
-                    [ShieldCheck, "Policy"],
-                    [KeyRound, "Credentials"],
-                    [Cpu, "Model gateway"],
-                  ].map(([I, l]) => {
-                    const Ico = I as typeof Cpu;
-                    return (
-                      <div key={l as string} className="flex items-center gap-1.5 rounded-sm bg-secondary px-2 py-1.5 text-[11px]">
-                        <Ico className="h-3 w-3 text-primary" />
-                        {l as string}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="relative mt-3 h-1 overflow-hidden rounded-full bg-secondary">
-                  <div className="absolute inset-y-0 w-1/4 bg-primary scan" />
-                </div>
-              </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        {tiles.map((t) => (
+          <div key={t.k} className="panel px-3 py-2.5">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{t.k}</div>
+            <div className="mt-1 flex items-end gap-2">
+              <span className="font-mono text-xl text-foreground">{t.v}</span>
+              {t.d && <div className="flex-1"><Sparkline data={t.d} className={t.c} /></div>}
             </div>
           </div>
+        ))}
+      </div>
 
-          {nodes.map((n, i) => (
-            <button
-              key={n.id}
-              onClick={() => setSelected(n.id)}
-              className="absolute w-[17%] -translate-x-1/2 -translate-y-1/2 text-left"
-              style={{ left: `${nodePos[i]!.x}%`, top: `${nodePos[i]!.y}%` }}
-            >
-              <div className={`panel p-2.5 transition-all ${selected === n.id ? "border-primary glow-primary" : "hover:border-muted-foreground"}`}>
-                <div className="flex items-center gap-2">
-                  <StatusDot status={n.status} />
-                  <span className="font-mono text-xs">{n.id}</span>
-                  <span className="ml-auto font-mono text-[10px] text-muted-foreground">{n.agent}</span>
-                </div>
-                <div className="mt-1 truncate text-[11px] text-muted-foreground">{n.task}</div>
-              </div>
-            </button>
-          ))}
+      <Toolbar topo={topo} />
+
+      <div className="hidden gap-5 min-[1100px]:grid min-[1100px]:grid-cols-[1fr_320px]">
+        <div className="space-y-3">
+          <TopologyCanvas topo={topo} />
+          <Ticker items={ticker} />
         </div>
-
-        <aside className="space-y-4">
-          <div className="panel p-5">
-            <SectionLabel>Selected node</SectionLabel>
-            <div className="mt-2 flex items-center gap-2">
-              <StatusDot status={node.status} />
-              <span className="font-mono text-lg">{node.id}</span>
-              <span className="ml-auto rounded-sm bg-secondary px-2 py-0.5 font-mono text-[10px] uppercase">{node.status}</span>
-            </div>
-            <dl className="mt-4 space-y-2 text-sm">
-              {[
-                ["Host", node.host],
-                ["Agent", node.agent],
-                ["Task", node.task],
-                ["Model", node.model],
-                ["Isolation", "1 VM per task"],
-              ].map(([k, v]) => (
-                <div key={k} className="flex justify-between gap-4 border-b border-border/60 pb-2">
-                  <dt className="text-muted-foreground">{k}</dt>
-                  <dd className="truncate text-right font-mono text-xs">{v}</dd>
-                </div>
-              ))}
-            </dl>
-            {[
-              ["CPU", node.cpu],
-              ["Memory", node.mem],
-            ].map(([k, v]) => (
-              <div key={k} className="mt-4">
-                <div className="flex justify-between font-mono text-[11px] text-muted-foreground">
-                  <span>{k}</span>
-                  <span>{v}%</span>
-                </div>
-                <div className="mt-1 h-1.5 rounded-full bg-secondary">
-                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${v}%` }} />
-                </div>
-              </div>
-            ))}
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              {["Pause", "Resume", "Recycle"].map((a) => (
-                <button key={a} className="rounded-sm border border-border py-1.5 text-xs hover:border-primary hover:text-primary">
-                  {a}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="panel p-5">
-            <SectionLabel>Legend</SectionLabel>
-            <ul className="mt-3 space-y-2 text-sm">
-              {[
-                ["busy", "Agent working"],
-                ["paused", "Paused · volume kept"],
-                ["idle", "Warm pool, ready"],
-                ["error", "Failed · orchestration resuming"],
-              ].map((pair) => pair as [string, string]).map(([s, l]) => (
-                <li key={s} className="flex items-center gap-2"><StatusDot status={s} /> {l}</li>
-              ))}
-            </ul>
-          </div>
+        <aside className="panel h-fit p-5">
+          <DetailPanel topo={topo} />
         </aside>
+      </div>
+
+      <div className="min-[1100px]:hidden">
+        <StackedView topo={topo} onPick={pickMobile} />
+        <div className="mt-3"><Ticker items={ticker} /></div>
+        <Sheet open={sheet} onOpenChange={setSheet}>
+          <SheetContent className="w-[340px] overflow-y-auto border-border bg-card">
+            <SheetTitle className="sr-only">Details</SheetTitle>
+            <div className="pt-6"><DetailPanel topo={topo} /></div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </div>
+  );
+}
+
+function Ticker({ items }: { items: { id: number; t: string; msg: string }[] }) {
+  return (
+    <div className="panel flex items-center gap-4 overflow-hidden px-4 py-2 font-mono text-[11px]">
+      <span className="flex shrink-0 items-center gap-2 text-primary"><span className="h-1.5 w-1.5 rounded-full bg-primary blink" /> ACTIVITY</span>
+      <div className="flex min-w-0 gap-6 overflow-hidden whitespace-nowrap">
+        {items.length === 0 && <span className="text-muted-foreground">listening…</span>}
+        {items.map((e, i) => (
+          <span key={e.id} className={i === 0 ? "text-foreground" : "text-muted-foreground"} style={{ opacity: 1 - i * 0.15 }}>
+            <span className="text-muted-foreground">{e.t}</span> {e.msg}
+          </span>
+        ))}
       </div>
     </div>
   );

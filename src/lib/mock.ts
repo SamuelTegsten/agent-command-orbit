@@ -47,3 +47,62 @@ export const eventTemplates = [
   ["workspace", "Warm pool replenished · 3 ready"],
   ["bridge", "Ticket TCK-1042 moved to In review"],
 ] as const;
+
+// ---------- Topology ----------
+export type WorkType = "task" | "review" | "maintenance";
+export type NodeStatus = Status | "transition";
+
+export type TopoNode = {
+  id: string;
+  host: string;
+  agent: string;
+  task: string;
+  status: NodeStatus;
+  cpu: number;
+  mem: number;
+  model: string; // model id or ""
+  client: string; // client id or ""
+  type: WorkType;
+  uptime: string;
+};
+
+export const hosts = [
+  { id: "virt-host-01", slots: 3, zone: "rack A · hypervisor" },
+  { id: "virt-host-02", slots: 3, zone: "rack A · hypervisor" },
+  { id: "virt-host-03", slots: 3, zone: "rack B · hypervisor" },
+];
+
+export const topoNodes: TopoNode[] = [
+  { id: "node-a1", host: "virt-host-01", agent: "coder", task: "TCK-1042 · fix auth retry", status: "busy", cpu: 72, mem: 58, model: "qwen", client: "cl-01", type: "task", uptime: "18m" },
+  { id: "node-a2", host: "virt-host-01", agent: "reviewer", task: "MR !318 · review", status: "busy", cpu: 41, mem: 37, model: "llama", client: "cl-02", type: "review", uptime: "6m" },
+  { id: "node-b1", host: "virt-host-02", agent: "coder", task: "TCK-1051 · bump deps", status: "busy", cpu: 63, mem: 49, model: "qwen", client: "cl-03", type: "task", uptime: "41m" },
+  { id: "node-b2", host: "virt-host-02", agent: "maintainer", task: "Paused · awaiting human", status: "paused", cpu: 2, mem: 22, model: "", client: "cl-03", type: "maintenance", uptime: "3h 12m" },
+  { id: "node-b3", host: "virt-host-02", agent: "reviewer", task: "MR !322 · review", status: "busy", cpu: 35, mem: 30, model: "llama", client: "cl-03", type: "review", uptime: "2m" },
+  { id: "node-c1", host: "virt-host-03", agent: "warm pool", task: "Ready", status: "idle", cpu: 1, mem: 8, model: "", client: "", type: "task", uptime: "—" },
+  { id: "node-c2", host: "virt-host-03", agent: "coder", task: "Crashed · resuming", status: "error", cpu: 0, mem: 31, model: "qwen", client: "cl-01", type: "task", uptime: "0m" },
+];
+
+export const hubParts = [
+  { id: "orchestration", label: "Orchestration", desc: "Durable workflows that resume after failure.", stat: "12 runs" },
+  { id: "policy", label: "Policy engine", desc: "Rules per repository or class: merges, models, tools.", stat: "7 denies" },
+  { id: "credentials", label: "Credentials", desc: "Short-lived tokens per tool call, hidden from agents.", stat: "318 issued" },
+  { id: "gateway", label: "Model gateway", desc: "Chooses a model per job and applies model policy.", stat: "41k tok/m" },
+  { id: "bridge", label: "Bridge", desc: "The only component that writes to people's tools.", stat: "64 writes" },
+  { id: "observability", label: "Observability", desc: "Run records and evaluation results.", stat: "eval 0.91" },
+];
+
+export const models = [
+  { id: "qwen", label: "qwen-coder-32b", kind: "open", gpu: "gpu-01", load: 62, blocked: false },
+  { id: "llama", label: "llama-70b", kind: "open", gpu: "gpu-02", load: 32, blocked: false },
+  { id: "cloud", label: "Cloud models", kind: "cloud", gpu: "external", load: 0, blocked: true },
+];
+
+export const tickerTemplates = [
+  "{node} checkpoint saved",
+  "Policy allowed git.push for {node}",
+  "Token issued to {node} · ttl 90s",
+  "{node} routed to open model",
+  "Bridge posted update from {node}",
+  "Warm pool replenished on virt-host-03",
+  "Cloud model request blocked · air-gapped",
+];
