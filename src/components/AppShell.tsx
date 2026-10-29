@@ -44,10 +44,21 @@ export function AppShell({ children }: { children: ReactNode }) {
           {/* Brand */}
           <Link to="/" className="flex shrink-0 items-center gap-2.5 border-r border-border pr-5">
             <svg viewBox="0 0 24 24" className="h-6 w-6 text-primary" aria-hidden="true">
-              <rect x="1.5" y="1.5" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M1.5 8.5 L22.5 8.5" stroke="currentColor" strokeWidth="1" opacity="0.35" />
-              <path d="M5 18.5 L9.5 11 L13 15 L15.5 12 L19 18.5 Z" fill="currentColor" />
-              <rect x="15.5" y="4" width="3" height="2" fill="currentColor" />
+              <path
+                d="M12 1.5 L21.09 6.75 L21.09 17.25 L12 22.5 L2.91 17.25 L2.91 6.75 Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinejoin="miter"
+              />
+              <path
+                d="M12 6 L17.19 9 L17.19 15 L12 18 L6.81 15 L6.81 9 Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinejoin="miter"
+              />
+              <path d="M12 10.4 L13.39 11.2 L13.39 12.8 L12 13.6 L10.61 12.8 L10.61 11.2 Z" fill="currentColor" />
             </svg>
             <div className="flex items-baseline gap-1.5 leading-none">
               <span className="font-display text-[15px] font-bold tracking-[0.04em] lowercase">craton</span>
