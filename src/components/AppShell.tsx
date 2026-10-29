@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Activity, Clock3, Layers, Search, Timer, Zap } from "lucide-react";
+import { Activity, AlertTriangle, Clock3, Layers, Search, Timer, Zap } from "lucide-react";
 import { layers } from "@/lib/mock";
+import { install, sandbox, usage, work } from "@/lib/craton";
 import { useSystemPulse } from "./topbar/useSystemPulse";
 import { CommandPalette } from "./topbar/CommandPalette";
 import { AlertsMenu } from "./topbar/AlertsMenu";
@@ -147,7 +148,46 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1680px] px-5 py-5">{children}</main>
+      <main className="mx-auto max-w-[1680px] px-5 pb-12 pt-5">
+        {/* Global work counters + usage pause */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 rounded-full border border-border bg-secondary/40 px-3 py-1 font-mono text-[11px]">
+            {([
+              ["running", work.running, "bg-primary"],
+              ["blocked", work.blocked, "bg-accent"],
+              ["failed", work.failed, "bg-destructive"],
+              ["queued", work.queued, "bg-muted-foreground"],
+              ["done", work.done, "bg-success"],
+            ] as const).map(([k, v, c]) => (
+              <span key={k} className="flex items-center gap-1.5">
+                <span className={`h-1.5 w-1.5 rounded-full ${v ? c : "border border-muted-foreground"}`} />
+                <span className="font-semibold text-foreground">{v}</span>
+                <span className="text-muted-foreground">{k}</span>
+              </span>
+            ))}
+          </div>
+          {usage.paused && (
+            <div className="flex items-center gap-2 rounded-md border border-accent/40 border-l-4 border-l-accent bg-accent/10 px-3 py-1 text-xs">
+              <AlertTriangle className="h-3.5 w-3.5 text-accent" />
+              <span className="font-semibold text-accent">Usage pause</span>
+              <span className="font-mono text-muted-foreground">{usage.window} · resumes {usage.resumes} · {usage.reason}</span>
+              <span className="font-mono font-semibold">in {usage.resumesIn}</span>
+            </div>
+          )}
+        </div>
+        {children}
+      </main>
+      <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/90 backdrop-blur">
+        <div className="mx-auto flex h-7 max-w-[1680px] items-center gap-2 px-5 font-mono text-[10.5px] text-muted-foreground">
+          <span className="text-foreground">{install.name}</span>·<span>mcp-probe</span>·<span>alma</span>·
+          <span className="text-primary">sandbox</span>·<span>{work.running} running</span>·<span>{sandbox.waiting} waiting</span>·
+          <span>polled just now</span>
+          <span className="ml-auto flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-success blink" />
+            <kbd className="rounded border border-border px-1">⌘K</kbd> search
+          </span>
+        </div>
+      </footer>
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </div>
   );

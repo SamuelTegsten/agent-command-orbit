@@ -12,6 +12,7 @@ import { Toolbar } from "@/components/topology/Toolbar";
 import { StackedView } from "@/components/topology/StackedView";
 import { Sparkline } from "@/components/topology/Sparkline";
 import { SystemGraph } from "@/components/SystemGraph";
+import { FleetPanel, SetupGrid } from "@/components/craton/RuntimePanels";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -70,6 +71,7 @@ function Monitor() {
   };
 
   return (
+    <div className="space-y-4">
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px] 2xl:grid-cols-[230px_minmax(0,1fr)_330px]">
       {/* Left: data overview */}
       <aside className="space-y-3 xl:col-span-2 2xl:col-span-1">
@@ -199,6 +201,9 @@ function Monitor() {
           <div className="pt-6"><DetailPanel topo={topo} /></div>
         </SheetContent>
       </Sheet>
+    </div>
+    <SetupGrid />
+    <FleetPanel />
     </div>
   );
 }
