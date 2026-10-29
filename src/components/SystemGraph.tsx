@@ -178,6 +178,24 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
             <div className="text-muted-foreground">{hE.label} · {flowLabel[hE.flow]}</div>
           </div>
         )}
+        {/* docked "now happening" card — stays put while the flow moves */}
+        {activeEdge && (
+          <div className="pointer-events-none absolute bottom-3 right-3 z-30 w-[230px] overflow-hidden rounded-md border border-border bg-background/90 shadow-lg backdrop-blur">
+            <div className="flex items-center justify-between border-b border-border px-2.5 py-1.5">
+              <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">Now happening</span>
+              <span className="font-mono text-[9px] text-muted-foreground">{step + 1}/{scenario.length}</span>
+            </div>
+            <div key={`c-${step}`} className="fade-in space-y-1 px-2.5 py-2 text-[11px]">
+              <div className="flex items-center gap-1.5 font-medium">
+                <span className="truncate">{byId[activeEdge.from]!.label}</span>
+                <span className={activeEdge.blocked ? "text-destructive" : "text-primary"}>→</span>
+                <span className="truncate">{byId[activeEdge.to]!.label}</span>
+              </div>
+              <div className="font-mono text-[10px] text-muted-foreground line-clamp-2">{scenario[step]?.log}</div>
+            </div>
+            <div className="h-0.5 bg-secondary"><div key={`p-${step}`} className="h-full bg-primary transition-all duration-500" style={{ width: `${((step + 1) / scenario.length) * 100}%` }} /></div>
+          </div>
+        )}
         <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.z})` }}>
         <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
           <defs>
@@ -244,17 +262,13 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
           </div>
         ))}
 
-        {/* callout for the node receiving work */}
+        {/* small tag pinned above the receiving node */}
         {activeEdge && (() => {
           const n = byId[activeEdge.to]!;
-          const left = n.x > 120;
           return (
-            <div key={`c-${step}`} className="fade-in pointer-events-none absolute z-10 w-[180px]" style={{ left: `${((n.x + (left ? -NW / 2 - 1 : NW / 2 + 1)) / W) * 100}%`, top: `${((n.y - NH / 2) / H) * 100}%`, transform: left ? "translateX(-100%) translateY(-100%)" : "translateY(-100%)" }}>
-              <div className="rounded-t-sm bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground">{n.label}</div>
-              <div className="space-y-0.5 rounded-b-sm border border-primary/50 bg-background/90 px-2 py-1.5 font-mono text-[10px]">
-                <div className="flex justify-between"><span className="mr-2 text-muted-foreground">Incoming</span><span>{activeEdge.label}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">From</span><span>{byId[activeEdge.from]!.label}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Now</span><span>{n.metric}</span></div>
+            <div key={`t-${step}`} className="fade-in pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-full" style={{ left: `${(n.x / W) * 100}%`, top: `${((n.y - NH / 2 - 0.8) / H) * 100}%` }}>
+              <div className={`whitespace-nowrap rounded-sm px-1.5 py-0.5 font-mono text-[9px] font-semibold shadow ${activeEdge.blocked ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground"}`}>
+                {activeEdge.blocked ? "✕ blocked" : `↓ ${activeEdge.label}`}
               </div>
             </div>
           );
