@@ -204,7 +204,7 @@ function Topology() {
                 ["paused", "Paused · volume kept"],
                 ["idle", "Warm pool, ready"],
                 ["error", "Failed · orchestration resuming"],
-              ].map(([s, l]) => (
+              ].map((pair) => pair as [string, string]).map(([s, l]) => (
                 <li key={s} className="flex items-center gap-2"><StatusDot status={s} /> {l}</li>
               ))}
             </ul>

@@ -44,7 +44,7 @@ const componentToSrc: Record<string, string> = {
 function Operations() {
   const [events, setEvents] = useState<Ev[]>([]);
   const [tick, setTick] = useState(0);
-  const [spark, setSpark] = useState<number[]>(Array(40).fill(30));
+  const [spark, setSpark] = useState<number[]>(Array.from({ length: 40 }, (_, i) => 35 + 25 * Math.sin(i / 3) + (i % 5) * 4));
 
   useEffect(() => {
     const id = setInterval(() => {
