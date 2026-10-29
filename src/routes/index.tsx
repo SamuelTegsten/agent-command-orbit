@@ -62,12 +62,12 @@ function Topology() {
                 d={`M ${p.x + 9} ${p.y} C ${p.x + 22} ${p.y}, ${hub.x - 16} ${hub.y}, ${hub.x - 8} ${hub.y}`}
                 fill="none"
                 vectorEffect="non-scaling-stroke"
-                className={clients[i].status === "idle" ? "stroke-border" : "stroke-accent flow-dash"}
+                className={clients[i]!.status === "idle" ? "stroke-border" : "stroke-accent flow-dash"}
                 strokeWidth={1.5}
               />
             ))}
             {nodePos.map((p, i) => {
-              const n = nodes[i];
+              const n = nodes[i]!;
               const cls =
                 n.status === "busy" ? "stroke-primary flow-dash" : n.status === "error" ? "stroke-destructive flow-dash" : n.status === "paused" ? "stroke-accent" : "stroke-border";
               return (
@@ -86,7 +86,7 @@ function Topology() {
           {clients.map((c, i) => {
             const Icon = kindIcon[c.kind as keyof typeof kindIcon];
             return (
-              <div key={c.id} className="absolute w-[17%] -translate-x-1/2 -translate-y-1/2" style={{ left: `${clientPos[i].x}%`, top: `${clientPos[i].y}%` }}>
+              <div key={c.id} className="absolute w-[17%] -translate-x-1/2 -translate-y-1/2" style={{ left: `${clientPos[i]!.x}%`, top: `${clientPos[i]!.y}%` }}>
                 <div className="panel flex items-center gap-3 p-3">
                   <Icon className="h-5 w-5 text-accent" />
                   <div className="min-w-0">
@@ -138,7 +138,7 @@ function Topology() {
               key={n.id}
               onClick={() => setSelected(n.id)}
               className="absolute w-[17%] -translate-x-1/2 -translate-y-1/2 text-left"
-              style={{ left: `${nodePos[i].x}%`, top: `${nodePos[i].y}%` }}
+              style={{ left: `${nodePos[i]!.x}%`, top: `${nodePos[i]!.y}%` }}
             >
               <div className={`panel p-2.5 transition-all ${selected === n.id ? "border-primary glow-primary" : "hover:border-muted-foreground"}`}>
                 <div className="flex items-center gap-2">
