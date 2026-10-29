@@ -1,11 +1,13 @@
+import { NodeGlyph } from "@/components/NodeGlyph";
+import { fleet } from "@/lib/craton";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Lock, Pause, Play } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { gedges, gnodes, scenario, zones, type Flow, type GEdge } from "@/lib/systemGraph";
 import { SectionLabel } from "@/components/AppShell";
 
 const W = 160;
 const H = 100;
-const NW = 17; // node width (canvas units)
+const NW = 20; // node width (canvas units)
 const NH = 9;
 
 const flowStroke: Record<Flow, string> = {
@@ -180,7 +182,7 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
         )}
         {/* docked "now happening" card — stays put while the flow moves */}
         {activeEdge && (
-          <div className="pointer-events-none absolute bottom-3 right-3 z-30 w-[230px] overflow-hidden rounded-sm border border-border bg-background/90 shadow-lg backdrop-blur">
+          <div className="pointer-events-none absolute right-16 top-3 z-30 w-[230px] overflow-hidden rounded-sm border border-border bg-background/90 shadow-lg backdrop-blur">
             <div className="flex items-center justify-between border-b border-border px-2.5 py-1.5">
               <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">Now happening</span>
               <span className="font-mono text-[9px] text-muted-foreground">{step + 1}/{scenario.length}</span>
@@ -276,7 +278,6 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
 
         {/* nodes */}
         {gnodes.map((n) => {
-          const Icon = n.icon;
           const lit = nodeLit(n.id);
           const isSel = selected === n.id;
           const dim = focus && focus !== n.id && !gedges.some((e) => (e.from === focus && e.to === n.id) || (e.to === focus && e.from === n.id));
@@ -289,36 +290,39 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
               className={`absolute -translate-x-1/2 -translate-y-1/2 text-left transition-all duration-300 ${dim ? "opacity-25" : ""}`}
               style={{ left: `${(n.x / W) * 100}%`, top: `${(n.y / H) * 100}%`, width: `${(NW / W) * 100}%`, height: `${(NH / H) * 100}%` }}
             >
-              {lit && <span className="pointer-events-none absolute -inset-1.5 rounded-sm border border-primary/60 ping-soft" />}
-              <div
-                className={`relative flex h-full items-center gap-2 rounded-sm border px-2 backdrop-blur transition-all duration-300 ${
-                  n.locked ? "border-destructive/40 bg-destructive/5" : lit ? "border-primary bg-primary/15 glow-primary" : isSel ? "border-accent bg-card glow-accent" : "border-border bg-card/90 hover:border-muted-foreground"
-                }`}
-              >
-                <div className={`hex grid h-7 w-8 shrink-0 place-items-center ${n.locked ? "bg-destructive/20 text-destructive" : lit ? "bg-primary text-primary-foreground" : "bg-secondary text-accent"}`}>
-                  {n.locked ? <Lock className="h-3.5 w-3.5" /> : <Icon className="h-3.5 w-3.5" />}
+              <div className={`relative flex h-full items-center gap-1.5 rounded-sm px-1 transition-all duration-300 ${isSel && !lit ? "bg-secondary/60" : "hover:bg-secondary/40"}`}>
+                <div className={`relative grid aspect-square h-full shrink-0 place-items-center rounded-full border transition-colors ${
+                  n.locked ? "border-destructive/50 bg-destructive/10 text-destructive" : lit ? "border-primary bg-primary/15 text-primary glow-primary" : isSel ? "border-accent bg-card text-accent" : "border-border bg-card/90 text-accent"}`}>
+                  <NodeGlyph id={n.id} live={lit} locked={n.locked} className="h-[70%] w-[70%]" />
                 </div>
                 <div className="min-w-0">
                   <div className="line-clamp-2 text-[10.5px] font-medium leading-tight">{n.label}</div>
-                  <div className="truncate font-mono text-[9px] text-muted-foreground">{lit ? "● active" : n.metric}</div>
+                  <div className={`truncate font-mono text-[9px] ${lit ? "text-primary" : "text-muted-foreground"}`}>{lit ? "● active" : n.metric}</div>
                 </div>
               </div>
             </button>
           );
         })}
 
-        {/* workspaces mini VMs */}
-        <div className="pointer-events-none absolute flex gap-1" style={{ left: `${((116.5 - 6.5) / W) * 100}%`, top: `${((62 + 6.5) / H) * 100}%` }}>
-          {["busy", "busy", "busy", "paused", "idle", "busy"].map((s, i) => (
-            <span key={i} className={`hex h-3 w-3.5 ${s === "busy" ? "bg-primary/80 blink" : s === "paused" ? "bg-accent/70" : "bg-border"}`} style={{ animationDelay: `${i * 0.25}s` }} />
-          ))}
+        {/* fleet: the real agent nodes, inside the execution zone */}
+        <div className="absolute grid grid-cols-3 gap-[3px]" style={{ left: `${(106 / W) * 100}%`, top: `${(72 / H) * 100}%`, width: `${(21 / W) * 100}%` }}>
+          {fleet.map((f) => {
+            const busy = f.status === "busy";
+            const warn = f.disk < 7.5;
+            return (
+              <div key={f.id} title={`${f.id} · ${f.status} · ${f.lastRole} · load ${f.load.toFixed(2)} · disk ${f.disk} GB`}
+                className={`relative overflow-hidden rounded-[2px] border px-1 py-0.5 ${busy ? "border-primary bg-primary/15" : "border-border bg-card/80"}`}>
+                <div className="flex items-center justify-between font-mono text-[8px] leading-none">
+                  <span className={busy ? "text-primary" : "text-muted-foreground"}>{f.id}</span>
+                  <span className={`h-1 w-1 rounded-full ${busy ? "bg-primary blink" : warn ? "bg-accent" : "bg-success"}`} />
+                </div>
+                <div className="mt-0.5 h-[2px] bg-border"><div className={`h-full ${busy ? "bg-primary" : "bg-success/60"}`} style={{ width: `${busy ? 80 : 8}%` }} /></div>
+                {busy && <span className="scan pointer-events-none absolute inset-0" />}
+              </div>
+            );
+          })}
         </div>
-        {/* GPU meter */}
-        <div className="pointer-events-none absolute flex h-4 items-end gap-0.5" style={{ left: `${((145 - 6) / W) * 100}%`, top: `${((64 + 6) / H) * 100}%` }}>
-          {Array.from({ length: 10 }).map((_, i) => (
-            <span key={i} className="eq w-1 origin-bottom rounded-sm bg-success/80" style={{ height: "100%", animationDelay: `${i * 0.09}s` }} />
-          ))}
-        </div>
+        <div className="pointer-events-none absolute font-mono text-[8px] uppercase tracking-[0.18em] text-muted-foreground" style={{ left: `${(106 / W) * 100}%`, top: `${(69 / H) * 100}%` }}>nodes · {fleet.filter((f) => f.status === "busy").length}/{fleet.length} busy</div>
         </div>
       </div>
 

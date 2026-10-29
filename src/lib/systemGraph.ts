@@ -11,7 +11,7 @@ export type GEdge = { id: string; from: string; to: string; flow: Flow; label: s
 export const zones: Zone[] = [
   { id: "people", label: "People", runsOn: "their usual tools", x: 1, w: 17 },
   { id: "collab", label: "Collaboration", runsOn: "container cluster", x: 20, w: 20 },
-  { id: "control", label: "Factory control plane", runsOn: "container cluster", x: 42, w: 60 },
+  { id: "control", label: "Hub · control plane", runsOn: "container cluster", x: 42, w: 60 },
   { id: "exec", label: "Agent execution", runsOn: "virtualisation hosts", x: 104, w: 25 },
   { id: "inference", label: "Inference", runsOn: "GPU servers", x: 131, w: 28 },
 ];
