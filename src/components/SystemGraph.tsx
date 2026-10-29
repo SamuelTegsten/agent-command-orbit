@@ -220,24 +220,6 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
             <div className="text-muted-foreground">{hE.label} · {flowLabel[hE.flow]}</div>
           </div>
         )}
-        {/* docked "now happening" card — stays put while the flow moves */}
-        {activeEdge && (
-          <div className="pointer-events-none absolute right-16 top-3 z-30 w-[230px] overflow-hidden rounded-sm border border-border bg-background/90 shadow-lg backdrop-blur">
-            <div className="flex items-center justify-between border-b border-border px-2.5 py-1.5">
-              <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">Now happening</span>
-              <span className="font-mono text-[9px] text-muted-foreground">{step + 1}/{scenario.length}</span>
-            </div>
-            <div key={`c-${step}`} className="fade-in space-y-1 px-2.5 py-2 text-[11px]">
-              <div className="flex items-center gap-1.5 font-medium">
-                <span className="truncate">{byId[activeEdge.from]!.label}</span>
-                <span className={activeEdge.blocked ? "text-destructive" : "text-primary"}>→</span>
-                <span className="truncate">{byId[activeEdge.to]!.label}</span>
-              </div>
-              <div className="font-mono text-[10px] text-muted-foreground line-clamp-2">{scenario[step]?.log}</div>
-            </div>
-            <div className="h-0.5 bg-secondary"><div key={`p-${step}`} className="h-full bg-primary transition-all duration-500" style={{ width: `${((step + 1) / scenario.length) * 100}%` }} /></div>
-          </div>
-        )}
         <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.z})` }}>
         <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
           <defs>
