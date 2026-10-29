@@ -80,8 +80,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Software Factory" },
-      { name: "description", content: "Control console for the agentic Software Factory." },
+      { title: "Basalt Software Factory" },
+      { name: "description", content: "Basalt Software Factory: the control console for agent-driven development. Experter på systemintegration." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
@@ -95,7 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Roboto+Slab:wght@400;600;700&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],

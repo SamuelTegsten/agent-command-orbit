@@ -1,2 +1,2 @@
 - [x] Topology upgrade
-- [ ] Apply Basalt brand profile (colours, fonts, text)
+- [x] Apply Basalt brand profile (colours, fonts, text)

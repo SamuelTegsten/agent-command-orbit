@@ -13,12 +13,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-8 px-6">
           <div className="flex items-center gap-3">
-            <div className="grid h-8 w-8 place-items-center rounded-sm bg-primary font-mono text-sm font-bold text-primary-foreground glow-primary">
-              SF
+            <div className="hex grid h-8 w-9 place-items-center bg-accent">
+              <div className="hex h-4 w-[18px] bg-primary" />
             </div>
             <div className="leading-tight">
-              <div className="text-sm font-semibold tracking-wide">SOFTWARE FACTORY</div>
-              <div className="font-mono text-[10px] text-muted-foreground">humans in control · air-gapped</div>
+              <div className="font-display text-base font-bold tracking-wide">
+                Basalt <span className="font-sans text-xs font-normal text-muted-foreground">Software Factory</span>
+              </div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Experter på systemintegration</div>
             </div>
           </div>
           <nav className="flex gap-1">

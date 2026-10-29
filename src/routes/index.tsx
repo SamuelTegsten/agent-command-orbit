@@ -13,9 +13,9 @@ import { Sparkline } from "@/components/topology/Sparkline";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Topology · Software Factory" },
+      { title: "Topology · Basalt Software Factory" },
       { name: "description", content: "Live map of client machines, the central hub, agent nodes and models." },
-      { property: "og:title", content: "Topology · Software Factory" },
+      { property: "og:title", content: "Topology · Basalt Software Factory" },
       { property: "og:description", content: "Live map of client machines, the central hub, agent nodes and models." },
     ],
   }),
