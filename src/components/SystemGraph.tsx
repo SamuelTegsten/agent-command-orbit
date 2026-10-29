@@ -1,7 +1,7 @@
 import { NodeGlyph } from "@/components/NodeGlyph";
 import { fleet } from "@/lib/craton";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Lock, Pause, Play } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { gedges, gnodes, scenario, zones, type Flow, type GEdge } from "@/lib/systemGraph";
 import { SectionLabel } from "@/components/AppShell";
 
@@ -278,7 +278,6 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
 
         {/* nodes */}
         {gnodes.map((n) => {
-          const Icon = n.icon;
           const lit = nodeLit(n.id);
           const isSel = selected === n.id;
           const dim = focus && focus !== n.id && !gedges.some((e) => (e.from === focus && e.to === n.id) || (e.to === focus && e.from === n.id));

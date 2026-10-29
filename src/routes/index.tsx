@@ -79,28 +79,17 @@ function Monitor() {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
         <section className="min-w-0 space-y-2">
-          <div className="flex items-center gap-1">
-            {scenes.map((s) => (
-              <button key={s.id} onClick={() => setScene(s.id)} className={`border-b-2 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors ${scene === s.id ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-                {s.label}
-              </button>
-            ))}
-            {scene === "system" && sel && (
+          <div className="flex h-8 items-center gap-3">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-foreground">System map</span>
+            <span className="font-mono text-[10px] text-muted-foreground">people · hub · nodes · models</span>
+            {sel && (
               <span className="ml-auto truncate font-mono text-[11px] text-muted-foreground">
                 <span className="text-foreground">{sel.label}</span> · <span className="text-primary">{sel.metric}</span>
               </span>
             )}
           </div>
           <div className="panel relative overflow-hidden">
-            {scene === "system" ? (
-              <SystemGraph compact onSelect={onSelect} onStep={onStep} />
-            ) : (
-              <div className="space-y-3 p-3">
-                <Toolbar topo={topo} />
-                <div className="hidden lg:block"><TopologyCanvas topo={topo} /></div>
-                <div className="lg:hidden"><StackedView topo={topo} onPick={pickMobile} /></div>
-              </div>
-            )}
+            <SystemGraph compact onSelect={onSelect} onStep={onStep} />
           </div>
         </section>
 
