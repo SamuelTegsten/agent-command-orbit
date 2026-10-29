@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Activity, AlertTriangle, Clock3, Layers, Search, Timer, Zap } from "lucide-react";
-import { layers } from "@/lib/mock";
+import { AlertTriangle, Clock3, Search } from "lucide-react";
 import { install, sandbox, usage, work } from "@/lib/craton";
 import { useSystemPulse } from "./topbar/useSystemPulse";
 import { CommandPalette } from "./topbar/CommandPalette";
@@ -11,16 +10,6 @@ const tabs = [
   { to: "/", label: "Monitor", code: "01" },
   { to: "/factory", label: "Factory", code: "02" },
 ] as const;
-
-function Vital({ icon: Icon, label, value, title }: { icon: typeof Zap; label: string; value: string; title: string }) {
-  return (
-    <div title={title} className="flex items-center gap-1.5 border-l border-border/70 pl-3 first:border-0 first:pl-0">
-      <Icon className="h-3 w-3 text-primary" />
-      <span className="text-muted-foreground/70">{label}</span>
-      <span className="text-foreground">{value}</span>
-    </div>
-  );
-}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pulse = useSystemPulse();
