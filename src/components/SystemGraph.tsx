@@ -98,7 +98,10 @@ export function routeEdges(nodes: GN[], edges: GEdge[]) {
   return out;
 }
 
-export function SystemGraph({ title = "", subtitle = "", compact = false, onSelect, onStep, nodes: gnodes = defaultNodes, edges: gedges = defaultEdges }: { nodes?: GN[]; edges?: GEdge[]; title?: string; subtitle?: string; compact?: boolean; onSelect?: (id: string) => void; onStep?: (step: number) => void }) {
+/** The step the board is currently playing out, published to the surrounding page. */
+export type GraphActivity = { step: number; total: number; from: string; to: string; label: string; flow: Flow; blocked: boolean; log: string };
+
+export function SystemGraph({ title = "", subtitle = "", compact = false, onSelect, onStep, onActivity, nodes: gnodes = defaultNodes, edges: gedges = defaultEdges }: { nodes?: GN[]; edges?: GEdge[]; title?: string; subtitle?: string; compact?: boolean; onSelect?: (id: string) => void; onStep?: (step: number) => void; onActivity?: (a: GraphActivity | null) => void }) {
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [hover, setHover] = useState<string | null>(null);
@@ -148,6 +151,8 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
     const s = scenario[step];
     if (!s) return;
     onStep?.(step);
+    const e = gedges.find((x) => x.id === s.edge);
+    onActivity?.(e ? { step, total: scenario.length, from: byId[e.from]?.label ?? e.from, to: byId[e.to]?.label ?? e.to, label: e.label, flow: e.flow, blocked: !!e.blocked, log: s.log } : null);
     setLog((l) => [{ k: Date.now(), t: new Date().toLocaleTimeString("en-GB"), msg: s.log }, ...l].slice(0, 7));
   }, [step]);
 
