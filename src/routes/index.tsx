@@ -8,8 +8,7 @@ import { TopologyCanvas } from "@/components/topology/TopologyCanvas";
 import { DetailPanel } from "@/components/topology/DetailPanel";
 import { Toolbar } from "@/components/topology/Toolbar";
 import { StackedView } from "@/components/topology/StackedView";
-import { InternalsPipeline } from "@/components/InternalsPipeline";
-import { hubStages } from "@/components/pipelineStages";
+import { SystemGraph } from "@/components/SystemGraph";
 import { Sparkline } from "@/components/topology/Sparkline";
 
 export const Route = createFileRoute("/")({
@@ -86,7 +85,7 @@ function Topology() {
         </Sheet>
       </div>
 
-      <InternalsPipeline subtitle="Inside the hub" title="How a request moves through the control plane" stages={hubStages} />
+      <SystemGraph subtitle="Inside the system" title="How every part of the factory connects" />
     </div>
   );
 }

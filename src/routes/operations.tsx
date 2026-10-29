@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { eventTemplates, layers, runs } from "@/lib/mock";
-import { InternalsPipeline } from "@/components/InternalsPipeline";
-import { lifecycleStages } from "@/components/pipelineStages";
+import { SystemGraph } from "@/components/SystemGraph";
 import { SectionLabel, StatusDot } from "@/components/AppShell";
 
 export const Route = createFileRoute("/operations")({
@@ -88,7 +87,7 @@ function Operations() {
         ))}
       </div>
 
-      <InternalsPipeline subtitle="Life of a task" title="One run, end to end" stages={lifecycleStages} speed={1300} />
+      <SystemGraph subtitle="System map" title="The whole factory, live" />
 
       <div className="grid gap-6 xl:grid-cols-[1fr_400px]">
         <div className="space-y-6">
