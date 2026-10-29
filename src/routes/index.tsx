@@ -46,14 +46,6 @@ function Monitor() {
   }, []);
   const onSelect = useCallback((id: string) => setGraphSel(id), []);
 
-  const _kpis = [
-    { k: "Runs in flight", v: "12", unit: "runs", d: health.tasks, c: "stroke-primary" },
-    { k: "Agents busy", v: `${nodes.filter((n) => n.status === "busy").length}/${nodes.length}`, unit: "nodes", d: null, c: "" },
-    { k: "Tokens", v: `${Math.round(last(health.tokens))}k`, unit: "/ min", d: health.tokens, c: "stroke-success" },
-    { k: "Hub latency", v: `${Math.round(last(health.latency))}`, unit: "ms", d: health.latency, c: "stroke-accent" },
-    { k: "Policy denials", v: `${Math.round(last(health.denials))}`, unit: "today", d: health.denials, c: "stroke-destructive" },
-    { k: "Clients", v: String(clients.length), unit: "connected", d: null, c: "" },
-  ];
 
   const sel = gnodes.find((n) => n.id === graphSel);
   const pickMobile = (s: Selection) => {
