@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Boxes, ChevronRight, Copy, Cpu, Database, LayoutGrid, Rows3, Server, X, Power, RotateCcw, ScrollText } from "lucide-react";
+import { AlertTriangle, ChevronRight, Copy, Cpu, LayoutGrid, Rows3, X, Power, RotateCcw, ScrollText } from "lucide-react";
 import { toast } from "sonner";
-import { fleet as fleetSeed, sandbox, setup, tokens, usage, type FleetNode, type SetupCard } from "@/lib/craton";
+import { fleet as fleetSeed, setup, usage, type FleetNode, type SetupCard } from "@/lib/craton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const toneDot: Record<SetupCard["tone"], string> = { ok: "bg-success", warn: "bg-accent", bad: "bg-destructive", info: "bg-primary" };
@@ -215,12 +215,6 @@ export function FleetPanel() {
     { k: "attention", label: "Attention", count: attention },
   ];
 
-  const stats = [
-    { icon: Server, k: "Utilisation", v: `${Math.round((busy / nodes.length) * 100)}%`, s: `${busy}/${nodes.length} busy · ${cores} cores · ${ram} GB` },
-    { icon: Database, k: "Tokens", v: tokens.total, s: `in ${tokens.in} · out ${tokens.out} · cache ${tokens.cache}` },
-    { icon: Boxes, k: "Sandbox", v: String(sandbox.active), s: `${sandbox.programs} programs · ${sandbox.waiting} waiting` },
-    { icon: AlertTriangle, k: "Failure rate", v: `${Math.round((totalFailed / Math.max(1, totalRan)) * 100)}%`, s: `${totalFailed} of ${totalRan} runs` },
-  ];
 
   return (
     <section className="panel overflow-hidden">
