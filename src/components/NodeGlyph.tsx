@@ -1,7 +1,7 @@
 // Bespoke animated glyphs — one per system component, showing what it does.
 // Drawn in a 32×32 box with theme colours; `live` speeds up / brightens them.
 
-type P = { live?: boolean; locked?: boolean };
+type P = { live?: boolean | undefined; locked?: boolean | undefined };
 const S = "stroke-current";
 const sw = { strokeWidth: 1.4, fill: "none", strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 
@@ -241,7 +241,7 @@ const map: Record<string, (p: P) => React.ReactElement> = {
   wss: Pool, ws: Workspaces, gateway: Gateway, open: Gpu, cloud: CloudOff,
 };
 
-export function NodeGlyph({ id, live, locked, className = "" }: { id: string; live?: boolean; locked?: boolean | undefined; className?: string }) {
+export function NodeGlyph({ id, live, locked, className = "" }: { id: string; live?: boolean | undefined; locked?: boolean | undefined; className?: string }) {
   const G = map[id] ?? Orchestration;
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden>
