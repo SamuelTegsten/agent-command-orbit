@@ -43,7 +43,7 @@ function edgePath(e: GEdge) {
   return `M ${a.x + 3} ${sy} C ${a.x + off} ${(sy + ty) / 2}, ${b.x + off} ${(sy + ty) / 2}, ${b.x + 3} ${ty}`;
 }
 
-export function SystemGraph({ title, subtitle }: { title: string; subtitle: string }) {
+export function SystemGraph({ title = "", subtitle = "", compact = false, onSelect, onStep }: { title?: string; subtitle?: string; compact?: boolean; onSelect?: (id: string) => void; onStep?: (step: number) => void }) {
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [hover, setHover] = useState<string | null>(null);
@@ -61,8 +61,13 @@ export function SystemGraph({ title, subtitle }: { title: string; subtitle: stri
   useEffect(() => {
     const s = scenario[step];
     if (!s) return;
+    onStep?.(step);
     setLog((l) => [{ k: Date.now(), t: new Date().toLocaleTimeString("en-GB"), msg: s.log }, ...l].slice(0, 7));
   }, [step]);
+
+  useEffect(() => {
+    onSelect?.(selected);
+  }, [selected, onSelect]);
 
   const activeEdge = gedges.find((e) => e.id === scenario[step]?.edge);
   const trail = new Set(scenario.slice(Math.max(0, step - 3), step).map((s) => s.edge));
@@ -73,12 +78,14 @@ export function SystemGraph({ title, subtitle }: { title: string; subtitle: stri
   const selEdges = gedges.filter((e) => e.from === selected || e.to === selected);
 
   return (
-    <div className="panel overflow-hidden">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border px-5 py-4">
-        <div>
-          <SectionLabel>{subtitle}</SectionLabel>
-          <h2 className="mt-1 text-xl font-semibold">{title}</h2>
-        </div>
+    <div className={compact ? "relative" : "panel overflow-hidden"}>
+      <div className={compact ? "absolute bottom-3 left-3 z-20 flex flex-wrap items-center gap-1.5 rounded-md border border-border bg-background/80 p-1.5 backdrop-blur" : "flex flex-wrap items-end justify-between gap-3 border-b border-border px-5 py-4"}>
+        {!compact && (
+          <div>
+            <SectionLabel>{subtitle}</SectionLabel>
+            <h2 className="mt-1 text-xl font-semibold">{title}</h2>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-1.5">
           {(Object.keys(flowLabel) as Flow[]).map((f) => (
             <button
@@ -166,6 +173,22 @@ export function SystemGraph({ title, subtitle }: { title: string; subtitle: stri
           );
         })()}
 
+        {/* callout for the node receiving work */}
+        {activeEdge && (() => {
+          const n = byId[activeEdge.to]!;
+          const left = n.x > 120;
+          return (
+            <div key={`c-${step}`} className="fade-in pointer-events-none absolute z-10 w-[150px]" style={{ left: `${((n.x + (left ? -NW / 2 - 1 : NW / 2 + 1)) / W) * 100}%`, top: `${((n.y - NH / 2) / H) * 100}%`, transform: left ? "translateX(-100%) translateY(-100%)" : "translateY(-100%)" }}>
+              <div className="rounded-t-sm bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground">{n.label}</div>
+              <div className="space-y-0.5 rounded-b-sm border border-primary/50 bg-background/90 px-2 py-1.5 font-mono text-[10px]">
+                <div className="flex justify-between"><span className="text-muted-foreground">Incoming</span><span>{activeEdge.label}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">From</span><span>{byId[activeEdge.from]!.label}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Now</span><span>{n.metric}</span></div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* nodes */}
         {gnodes.map((n) => {
           const Icon = n.icon;
@@ -213,7 +236,7 @@ export function SystemGraph({ title, subtitle }: { title: string; subtitle: stri
         </div>
       </div>
 
-      <div className="grid gap-0 border-t border-border md:grid-cols-[1fr_1.2fr]">
+      {!compact && <div className="grid gap-0 border-t border-border md:grid-cols-[1fr_1.2fr]">
         <div className="border-b border-border p-4 md:border-b-0 md:border-r">
           <SectionLabel>Selected · {zones.find((z) => z.id === sel.zone)?.label}</SectionLabel>
           <div className="mt-1.5 flex items-center gap-2">
@@ -243,7 +266,7 @@ export function SystemGraph({ title, subtitle }: { title: string; subtitle: stri
             </div>
           ))}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
