@@ -49,7 +49,7 @@ function Operations() {
   useEffect(() => {
     const id = setInterval(() => {
       setTick((t) => t + 1);
-      const [src, msg] = eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
+      const [src, msg] = eventTemplates[Math.floor(Math.random() * eventTemplates.length)]!;
       const now = new Date().toLocaleTimeString("en-GB");
       setEvents((e) => [{ id: Date.now(), t: now, src, msg }, ...e].slice(0, 40));
       setSpark((s) => [...s.slice(1), 20 + Math.random() * 70]);
