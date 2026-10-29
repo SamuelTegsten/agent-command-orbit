@@ -2,12 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { runs } from "@/lib/mock";
 import { gnodes, scenario } from "@/lib/systemGraph";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { useTopology, type Selection } from "@/components/topology/useTopology";
-import { TopologyCanvas } from "@/components/topology/TopologyCanvas";
-import { DetailPanel } from "@/components/topology/DetailPanel";
-import { Toolbar } from "@/components/topology/Toolbar";
-import { StackedView } from "@/components/topology/StackedView";
+import { useTopology } from "@/components/topology/useTopology";
 import { Sparkline } from "@/components/topology/Sparkline";
 import { SystemGraph } from "@/components/SystemGraph";
 import { FleetPanel, SetupGrid } from "@/components/craton/RuntimePanels";
@@ -24,18 +19,11 @@ export const Route = createFileRoute("/")({
   component: Monitor,
 });
 
-const scenes = [
-  { id: "system", label: "System map" },
-  { id: "topology", label: "Hub & nodes" },
-] as const;
-type Scene = (typeof scenes)[number]["id"];
 
 function Monitor() {
   const topo = useTopology();
-  const [scene, setScene] = useState<Scene>("system");
   const [graphSel, setGraphSel] = useState("orch");
   const [trace, setTrace] = useState<{ k: number; t: string; msg: string }[]>([]);
-  const [sheet, setSheet] = useState(false);
   const { nodes, health } = topo;
   const last = (a: number[]) => a[a.length - 1] ?? 0;
 
@@ -48,10 +36,6 @@ function Monitor() {
 
 
   const sel = gnodes.find((n) => n.id === graphSel);
-  const pickMobile = (s: Selection) => {
-    topo.setSelection(s);
-    setSheet(true);
-  };
 
   const busy = nodes.filter((n) => n.status === "busy").length;
   const tiles = [
@@ -128,12 +112,6 @@ function Monitor() {
       <SetupGrid />
       <FleetPanel />
 
-      <Sheet open={sheet} onOpenChange={setSheet}>
-        <SheetContent className="w-[340px] overflow-y-auto border-border bg-card">
-          <SheetTitle className="sr-only">Details</SheetTitle>
-          <div className="pt-6"><DetailPanel topo={topo} /></div>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }
