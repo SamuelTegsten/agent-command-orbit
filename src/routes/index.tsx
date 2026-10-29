@@ -4,7 +4,7 @@ import { runs } from "@/lib/mock";
 import { gnodes, scenario } from "@/lib/systemGraph";
 import { useTopology } from "@/components/topology/useTopology";
 import { Sparkline } from "@/components/topology/Sparkline";
-import { SystemGraph } from "@/components/SystemGraph";
+import { SystemGraph, type GraphActivity } from "@/components/SystemGraph";
 import { FleetPanel, SetupGrid } from "@/components/craton/RuntimePanels";
 
 export const Route = createFileRoute("/")({
@@ -24,6 +24,7 @@ function Monitor() {
   const topo = useTopology();
   const [graphSel, setGraphSel] = useState("orch");
   const [trace, setTrace] = useState<{ k: number; t: string; msg: string }[]>([]);
+  const [activity, setActivity] = useState<GraphActivity | null>(null);
   const { nodes, health } = topo;
   const last = (a: number[]) => a[a.length - 1] ?? 0;
 
@@ -76,11 +77,28 @@ function Monitor() {
             )}
           </div>
           <div className="panel relative overflow-hidden">
-            <SystemGraph compact onSelect={onSelect} onStep={onStep} />
+            <SystemGraph compact onSelect={onSelect} onStep={onStep} onActivity={setActivity} />
           </div>
         </section>
 
         <aside className="space-y-4 xl:pt-9">
+          <div className="panel overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border px-4 py-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Now happening</span>
+              <span className="font-mono text-[10px] text-muted-foreground">{activity ? `${activity.step + 1}/${activity.total}` : "—"}</span>
+            </div>
+            <div key={activity?.step ?? "idle"} className="fade-in space-y-1.5 px-4 py-3">
+              <div className="flex items-center gap-2 text-[13px] font-medium">
+                <span className="truncate">{activity?.from ?? "Idle"}</span>
+                <span className={activity?.blocked ? "text-destructive" : "text-primary"}>→</span>
+                <span className="truncate">{activity?.to ?? ""}</span>
+              </div>
+              <div className="font-mono text-[10px] leading-relaxed text-muted-foreground">{activity?.log ?? "No run in progress."}</div>
+            </div>
+            <div className="h-1 bg-secondary">
+              <div key={activity?.step ?? "bar"} className="h-full bg-primary transition-all duration-500" style={{ width: `${activity ? ((activity.step + 1) / activity.total) * 100 : 0}%` }} />
+            </div>
+          </div>
           <div className="panel p-4">
             <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Workflows</div>
             <ul className="space-y-3">
