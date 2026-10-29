@@ -1,2 +1,4 @@
 - [x] Topology upgrade
-- [x] Apply Basalt brand profile (colours, fonts, text)
+- [x] Apply Basalt brand
+- [x] Full system node map
+- [x] Merge Topology + Operations into one clean page (match reference image); keep Factory page

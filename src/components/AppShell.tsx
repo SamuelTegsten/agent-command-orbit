@@ -2,16 +2,15 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 const tabs = [
-  { to: "/", label: "Topology", code: "01" },
-  { to: "/operations", label: "Operations", code: "02" },
-  { to: "/factory", label: "Factory", code: "03" },
+  { to: "/", label: "Monitor", code: "01" },
+  { to: "/factory", label: "Factory", code: "02" },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background bg-grid">
       <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-8 px-6">
+        <div className="mx-auto flex h-14 max-w-[1680px] items-center gap-8 px-6">
           <div className="flex items-center gap-3">
             <div className="hex grid h-8 w-9 place-items-center bg-accent">
               <div className="hex h-4 w-[18px] bg-primary" />
@@ -44,7 +43,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-[1440px] px-6 py-6">{children}</main>
+      <main className="mx-auto max-w-[1680px] px-5 py-5">{children}</main>
     </div>
   );
 }

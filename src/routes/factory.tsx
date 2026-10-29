@@ -63,7 +63,7 @@ function Factory() {
   return (
     <div className="grid h-[calc(100vh-7rem)] gap-4 lg:grid-cols-[260px_1fr_300px]">
       <aside className="panel flex flex-col p-4">
-        <SectionLabel>03 / Factory</SectionLabel>
+        <SectionLabel>02 / Factory</SectionLabel>
         <button className="mt-3 rounded-sm bg-primary py-2 text-sm font-medium text-primary-foreground glow-primary hover:opacity-90">+ New task</button>
         <div className="mt-5"><SectionLabel>Your work</SectionLabel></div>
         <div className="mt-2 space-y-1">
