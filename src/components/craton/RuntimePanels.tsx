@@ -48,7 +48,7 @@ export function SetupGrid() {
               key={c.key}
               onClick={() => setOpen(active ? null : c.key)}
               aria-expanded={active}
-              className={`group relative px-3 py-2.5 text-left transition-colors hover:bg-secondary/40 ${active ? "bg-secondary/50" : ""}`}
+              className={`group relative px-4 py-3 text-left transition-colors hover:bg-secondary/40 ${active ? "bg-secondary/50" : ""}`}
             >
               {active && <span className="absolute inset-x-0 top-0 h-0.5 bg-primary" />}
               <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
@@ -57,7 +57,6 @@ export function SetupGrid() {
                 <ChevronRight className={`ml-auto h-3 w-3 transition-transform ${active ? "rotate-90 text-primary" : "opacity-0 group-hover:opacity-100"}`} />
               </div>
               <div className={`mt-0.5 font-display text-base font-bold ${c.tone === "bad" ? "text-destructive" : ""}`}>{c.value}</div>
-              <div className="truncate text-[11px] text-muted-foreground">{c.sub}</div>
             </button>
           );
         })}
@@ -142,16 +141,13 @@ function NodeTile({ n, onOpen }: { n: FleetNode; onOpen: () => void }) {
   const busy = n.status === "busy";
   const lowDisk = n.disk < LOW_DISK;
   return (
-    <button onClick={onOpen} className={`group relative rounded-sm border bg-background/50 p-2.5 text-left transition-colors hover:border-primary/70 hover:bg-secondary/30 ${busy ? "border-primary/60" : "border-border"}`}>
+    <button onClick={onOpen} className={`group relative rounded-sm border bg-background/50 p-3.5 text-left transition-colors hover:border-primary/70 hover:bg-secondary/30 ${busy ? "border-primary/60" : "border-border"}`}>
       {busy && <span className="scan pointer-events-none absolute inset-0 overflow-hidden" />}
       <div className="flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${busy ? "bg-primary blink" : n.status === "offline" ? "bg-muted-foreground" : "bg-success"}`} />
         <span className="font-mono text-sm font-semibold">{n.id}</span>
         <span className="font-mono text-[10px] text-muted-foreground">{n.lastRole}</span>
         {needsAttention(n) && <AlertTriangle className="ml-auto h-3 w-3 text-accent" aria-label="Needs attention" />}
-      </div>
-      <div className="mt-1 truncate text-[11px] text-muted-foreground">
-        {busy ? <span className="text-primary">working · </span> : <span>idle {n.idleFor} · </span>}{n.lastIntent}
       </div>
       <div className="mt-2 grid grid-cols-3 gap-2">
         <Meter label="load" v={n.load} max={n.cores} value={n.load.toFixed(2)} />
@@ -250,16 +246,6 @@ export function FleetPanel() {
         </div>
       </header>
 
-      <div className="grid grid-cols-2 divide-x divide-border/60 border-b border-border/60 lg:grid-cols-4">
-        {stats.map((t) => (
-          <div key={t.k} className="px-3 py-2">
-            <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground"><t.icon className="h-3 w-3 text-primary" />{t.k}</div>
-            <div className="font-display text-lg font-bold leading-tight">{t.v}</div>
-            <div className="truncate text-[10px] text-muted-foreground">{t.s}</div>
-          </div>
-        ))}
-      </div>
-
       <div className="flex flex-wrap gap-1 px-3 pt-2.5">
         {filters.map((f) => (
           <button key={f.k} onClick={() => setFilter(f.k)} aria-pressed={filter === f.k}
@@ -273,7 +259,7 @@ export function FleetPanel() {
         {shown.length === 0 ? (
           <div className="py-8 text-center text-xs text-muted-foreground">No nodes match this filter.</div>
         ) : view === "grid" ? (
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
             {shown.map((n) => <NodeTile key={n.id} n={n} onOpen={() => setOpenId(n.id)} />)}
           </div>
         ) : (
