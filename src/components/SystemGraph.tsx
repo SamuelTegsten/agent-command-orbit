@@ -2,7 +2,7 @@ import { NodeGlyph } from "@/components/NodeGlyph";
 import { fleet } from "@/lib/craton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
-import { gedges, gnodes, scenario, zones, type Flow, type GEdge } from "@/lib/systemGraph";
+import { gedges as defaultEdges, gnodes as defaultNodes, scenario, zones, type Flow, type GEdge } from "@/lib/systemGraph";
 import { SectionLabel } from "@/components/AppShell";
 
 const W = 160;
@@ -26,8 +26,6 @@ const flowFill: Record<Flow, string> = {
 };
 const flowLabel: Record<Flow, string> = { work: "Work", control: "Control / policy", data: "Telemetry", model: "Inference", feedback: "Feedback to people" };
 
-const byId = Object.fromEntries(gnodes.map((n) => [n.id, n]));
-
 // Orthogonal "rail" routing: straight segments with softly rounded corners.
 function ortho(pts: [number, number][], r = 1.6) {
   let d = `M ${pts[0]![0]} ${pts[0]![1]}`;
@@ -44,35 +42,72 @@ function ortho(pts: [number, number][], r = 1.6) {
   return d + ` L ${last[0]} ${last[1]}`;
 }
 
-function edgeGeom(e: GEdge, idx: number) {
-  const a = byId[e.from]!;
-  const b = byId[e.to]!;
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const lane = ((idx % 3) - 1) * 0.9; // spread parallel rails apart
-  if (Math.abs(dx) >= NW) {
-    const sx = a.x + Math.sign(dx) * (NW / 2);
-    const tx = b.x - Math.sign(dx) * (NW / 2);
-    const mx = (sx + tx) / 2 + lane;
-    const sy = a.y + lane * 0.6, ty = b.y + lane * 0.6;
-    return { d: ortho([[sx, sy], [mx, sy], [mx, ty], [tx, ty]]), s: [sx, sy] as const, t: [tx, ty] as const };
-  }
-  const sy = a.y + Math.sign(dy || 1) * (NH / 2);
-  const ty = b.y - Math.sign(dy || 1) * (NH / 2);
-  const my = (sy + ty) / 2 + lane;
-  const sx = a.x + lane * 2, tx = b.x + lane * 2;
-  return { d: ortho([[sx, sy], [sx, my], [tx, my], [tx, ty]]), s: [sx, sy] as const, t: [tx, ty] as const };
+type Side = "l" | "r" | "t" | "b";
+type GN = (typeof defaultNodes)[number];
+
+/**
+ * Data-driven rail router. Nothing is hand-placed: every edge picks the sides it
+ * leaves/enters from the live node positions, and edges sharing a side get evenly
+ * spread "ports" ordered by where the other end sits — so adding, removing or
+ * moving nodes/edges re-routes the whole board automatically.
+ */
+export function routeEdges(nodes: GN[], edges: GEdge[]) {
+  const by = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  const live = edges.filter((e) => by[e.from] && by[e.to]);
+  const sides = live.map((e) => {
+    const a = by[e.from]!, b = by[e.to]!;
+    const horiz = Math.abs(b.x - a.x) >= NW;
+    const s: Side = horiz ? (b.x > a.x ? "r" : "l") : (b.y >= a.y ? "b" : "t");
+    const t: Side = horiz ? (b.x > a.x ? "l" : "r") : (b.y >= a.y ? "t" : "b");
+    return { e, a, b, horiz, s, t };
+  });
+  // collect attachments per node side
+  const slots = new Map<string, { key: string; order: number }[]>();
+  const push = (nid: string, side: Side, key: string, other: GN) => {
+    const k = `${nid}:${side}`;
+    const order = side === "l" || side === "r" ? other.y : other.x;
+    (slots.get(k) ?? slots.set(k, []).get(k)!).push({ key, order });
+  };
+  sides.forEach(({ e, a, b, s, t }) => { push(a.id, s, `${e.id}:s`, b); push(b.id, t, `${e.id}:t`, a); });
+  const offset = new Map<string, number>();
+  slots.forEach((list, k) => {
+    const vertical = k.endsWith(":l") || k.endsWith(":r");
+    const span = (vertical ? NH : NW) * 0.6;
+    list.sort((x, y) => x.order - y.order).forEach((it, i) => {
+      offset.set(it.key, list.length === 1 ? 0 : -span / 2 + (span * i) / (list.length - 1));
+    });
+  });
+  const anchor = (n: GN, side: Side, off: number): [number, number] =>
+    side === "r" ? [n.x + NW / 2, n.y + off] : side === "l" ? [n.x - NW / 2, n.y + off]
+    : side === "b" ? [n.x + off, n.y + NH / 2] : [n.x + off, n.y - NH / 2];
+  // bundle-aware mid channel: spread edges that share the same corridor
+  const corridor = new Map<string, number>();
+  const out: Record<string, { d: string; s: readonly [number, number]; t: readonly [number, number] }> = {};
+  sides.forEach(({ e, a, b, horiz, s, t }) => {
+    const S = anchor(a, s, offset.get(`${e.id}:s`) ?? 0);
+    const T = anchor(b, t, offset.get(`${e.id}:t`) ?? 0);
+    const mid = horiz ? (S[0] + T[0]) / 2 : (S[1] + T[1]) / 2;
+    const ck = `${horiz ? "x" : "y"}${Math.round(mid / 4)}`;
+    const n = corridor.get(ck) ?? 0; corridor.set(ck, n + 1);
+    const lane = (n % 2 ? 1 : -1) * Math.ceil(n / 2) * 0.9;
+    const pts: [number, number][] = horiz
+      ? [S, [mid + lane, S[1]], [mid + lane, T[1]], T]
+      : [S, [S[0], mid + lane], [T[0], mid + lane], T];
+    out[e.id] = { d: ortho(pts), s: S, t: T };
+  });
+  return out;
 }
 
-export function SystemGraph({ title = "", subtitle = "", compact = false, onSelect, onStep }: { title?: string; subtitle?: string; compact?: boolean; onSelect?: (id: string) => void; onStep?: (step: number) => void }) {
+export function SystemGraph({ title = "", subtitle = "", compact = false, onSelect, onStep, nodes: gnodes = defaultNodes, edges: gedges = defaultEdges }: { nodes?: GN[]; edges?: GEdge[]; title?: string; subtitle?: string; compact?: boolean; onSelect?: (id: string) => void; onStep?: (step: number) => void }) {
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [hover, setHover] = useState<string | null>(null);
   const [selected, setSelected] = useState<string>("orch");
   const [log, setLog] = useState<{ k: number; t: string; msg: string }[]>([]);
   const [visible, setVisible] = useState<Record<Flow, boolean>>({ work: true, control: true, data: true, model: true, feedback: true });
-  const geoms = useMemo(() => Object.fromEntries(gedges.map((e, i) => [e.id, edgeGeom(e, i)])), []);
-  const paths = useMemo(() => Object.fromEntries(gedges.map((e) => [e.id, geoms[e.id]!.d])), [geoms]);
+  const byId = useMemo(() => Object.fromEntries(gnodes.map((n) => [n.id, n])), [gnodes]);
+  const geoms = useMemo(() => routeEdges(gnodes, gedges), [gnodes, gedges]);
+  const paths = useMemo(() => Object.fromEntries(Object.entries(geoms).map(([k, g]) => [k, g.d])), [geoms]);
   const [hoverEdge, setHoverEdge] = useState<string | null>(null);
   const [view, setView] = useState({ z: 1, x: 0, y: 0 });
   const viewRef = useRef(view);

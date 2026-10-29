@@ -119,16 +119,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-7 max-w-[1680px] items-center gap-3 px-5 font-mono text-[10px] text-muted-foreground">
           <span className="shrink-0 text-foreground">{install.name}</span>
           <span className="hidden shrink-0 sm:inline">alma · sandbox {sandbox.waiting} waiting</span>
-          <div className="relative min-w-0 flex-1 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]">
-            <div className="marquee flex w-max items-center gap-8 whitespace-nowrap">
-              {[0, 1].map((copy) => (
-                <span key={copy} className="flex items-center gap-8">
-                  {tickerLine.map((line, i) => (
-                    <span key={`${copy}-${i}`}><span className="text-primary">▸</span> {line}</span>
-                  ))}
-                </span>
-              ))}
-            </div>
+          <div className="min-w-0 flex-1 truncate">
+            {tickerLine[0] && <span key={tickerLine[0]} className="fade-in"><span className="text-primary">▸</span> {tickerLine[0]}</span>}
           </div>
           <span className="flex shrink-0 items-center gap-1.5"><span className="h-1.5 w-1.5 bg-success blink" />live</span>
         </div>
