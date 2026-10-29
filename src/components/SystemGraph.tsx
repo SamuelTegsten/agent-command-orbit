@@ -26,21 +26,40 @@ const flowLabel: Record<Flow, string> = { work: "Work", control: "Control / poli
 
 const byId = Object.fromEntries(gnodes.map((n) => [n.id, n]));
 
-function edgePath(e: GEdge) {
+// Orthogonal "rail" routing: straight segments with softly rounded corners.
+function ortho(pts: [number, number][], r = 1.6) {
+  let d = `M ${pts[0]![0]} ${pts[0]![1]}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [px, py] = pts[i - 1]!; const [cx, cy] = pts[i]!; const [nx, ny] = pts[i + 1]!;
+    const l1 = Math.hypot(cx - px, cy - py), l2 = Math.hypot(nx - cx, ny - cy);
+    const rr = Math.min(r, l1 / 2, l2 / 2);
+    if (rr < 0.05) { d += ` L ${cx} ${cy}`; continue; }
+    const ax = cx - ((cx - px) / l1) * rr, ay = cy - ((cy - py) / l1) * rr;
+    const bx = cx + ((nx - cx) / l2) * rr, by = cy + ((ny - cy) / l2) * rr;
+    d += ` L ${ax} ${ay} Q ${cx} ${cy} ${bx} ${by}`;
+  }
+  const last = pts[pts.length - 1]!;
+  return d + ` L ${last[0]} ${last[1]}`;
+}
+
+function edgeGeom(e: GEdge, idx: number) {
   const a = byId[e.from]!;
   const b = byId[e.to]!;
   const dx = b.x - a.x;
   const dy = b.y - a.y;
+  const lane = ((idx % 3) - 1) * 0.9; // spread parallel rails apart
   if (Math.abs(dx) >= NW) {
     const sx = a.x + Math.sign(dx) * (NW / 2);
     const tx = b.x - Math.sign(dx) * (NW / 2);
-    const m = (tx - sx) / 2;
-    return `M ${sx} ${a.y} C ${sx + m} ${a.y}, ${tx - m} ${b.y}, ${tx} ${b.y}`;
+    const mx = (sx + tx) / 2 + lane;
+    const sy = a.y + lane * 0.6, ty = b.y + lane * 0.6;
+    return { d: ortho([[sx, sy], [mx, sy], [mx, ty], [tx, ty]]), s: [sx, sy] as const, t: [tx, ty] as const };
   }
-  const sy = a.y + Math.sign(dy) * (NH / 2);
-  const ty = b.y - Math.sign(dy) * (NH / 2);
-  const off = 6;
-  return `M ${a.x + 3} ${sy} C ${a.x + off} ${(sy + ty) / 2}, ${b.x + off} ${(sy + ty) / 2}, ${b.x + 3} ${ty}`;
+  const sy = a.y + Math.sign(dy || 1) * (NH / 2);
+  const ty = b.y - Math.sign(dy || 1) * (NH / 2);
+  const my = (sy + ty) / 2 + lane;
+  const sx = a.x + lane * 2, tx = b.x + lane * 2;
+  return { d: ortho([[sx, sy], [sx, my], [tx, my], [tx, ty]]), s: [sx, sy] as const, t: [tx, ty] as const };
 }
 
 export function SystemGraph({ title = "", subtitle = "", compact = false, onSelect, onStep }: { title?: string; subtitle?: string; compact?: boolean; onSelect?: (id: string) => void; onStep?: (step: number) => void }) {
@@ -50,7 +69,37 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
   const [selected, setSelected] = useState<string>("orch");
   const [log, setLog] = useState<{ k: number; t: string; msg: string }[]>([]);
   const [visible, setVisible] = useState<Record<Flow, boolean>>({ work: true, control: true, data: true, model: true, feedback: true });
-  const paths = useMemo(() => Object.fromEntries(gedges.map((e) => [e.id, edgePath(e)])), []);
+  const geoms = useMemo(() => Object.fromEntries(gedges.map((e, i) => [e.id, edgeGeom(e, i)])), []);
+  const paths = useMemo(() => Object.fromEntries(gedges.map((e) => [e.id, geoms[e.id]!.d])), [geoms]);
+  const [hoverEdge, setHoverEdge] = useState<string | null>(null);
+  const [view, setView] = useState({ z: 1, x: 0, y: 0 });
+  const viewRef = useRef(view);
+  viewRef.current = view;
+  const stageRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ x: number; y: number; ox: number; oy: number; moved: boolean } | null>(null);
+  const zoomAt = (next: number, px: number, py: number) => {
+    setView((v) => {
+      const z = Math.min(4, Math.max(0.5, next));
+      const k = z / v.z;
+      return { z, x: px - (px - v.x) * k, y: py - (py - v.y) * k };
+    });
+  };
+  const zoomCenter = (f: number) => {
+    const r = stageRef.current?.getBoundingClientRect();
+    if (r) zoomAt(viewRef.current.z * f, r.width / 2, r.height / 2);
+  };
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
+      const r = el.getBoundingClientRect();
+      zoomAt(viewRef.current.z * Math.exp(-dy * 0.0018), e.clientX - r.left, e.clientY - r.top);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
 
   useEffect(() => {
     if (!playing) return;
@@ -71,8 +120,9 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
 
   const activeEdge = gedges.find((e) => e.id === scenario[step]?.edge);
   const trail = new Set(scenario.slice(Math.max(0, step - 3), step).map((s) => s.edge));
+  const hE = hoverEdge ? gedges.find((e) => e.id === hoverEdge) : undefined;
   const focus = hover ?? null;
-  const connected = (eid: GEdge) => !focus || eid.from === focus || eid.to === focus;
+  const connected = (eid: GEdge) => (hE ? eid.id === hE.id : !focus || eid.from === focus || eid.to === focus);
   const nodeLit = (id: string) => activeEdge && (activeEdge.from === id || activeEdge.to === id);
   const sel = byId[selected]!;
   const selEdges = gedges.filter((e) => e.from === selected || e.to === selected);
@@ -103,7 +153,32 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
         </div>
       </div>
 
-      <div className="relative aspect-[16/10] w-full bg-grid">
+      <div
+        ref={stageRef}
+        className="relative aspect-[16/10] w-full touch-none overflow-hidden bg-grid cursor-grab active:cursor-grabbing select-none"
+        onPointerDown={(e) => { drag.current = { x: e.clientX, y: e.clientY, ox: view.x, oy: view.y, moved: false }; }}
+        onPointerMove={(e) => {
+          const d = drag.current; if (!d) return;
+          const mx = e.clientX - d.x, my = e.clientY - d.y;
+          if (!d.moved && Math.hypot(mx, my) > 4) { d.moved = true; (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); }
+          if (d.moved) setView((v) => ({ ...v, x: d.ox + mx, y: d.oy + my }));
+        }}
+        onPointerUp={() => { setTimeout(() => { drag.current = null; }, 0); }}
+        onClickCapture={(e) => { if (drag.current?.moved) { e.stopPropagation(); e.preventDefault(); } }}
+      >
+        {/* zoom controls */}
+        <div className="absolute right-3 top-3 z-30 flex flex-col overflow-hidden rounded-md border border-border bg-background/85 backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
+          <button onClick={() => zoomCenter(1.25)} className="px-2.5 py-1.5 text-sm hover:bg-secondary" aria-label="Zoom in">+</button>
+          <button onClick={() => zoomCenter(0.8)} className="border-t border-border px-2.5 py-1.5 text-sm hover:bg-secondary" aria-label="Zoom out">−</button>
+          <button onClick={() => setView({ z: 1, x: 0, y: 0 })} className="border-t border-border px-1 py-1.5 font-mono text-[9px] hover:bg-secondary" aria-label="Reset view">{Math.round(view.z * 100)}%</button>
+        </div>
+        {hE && (
+          <div className="pointer-events-none absolute left-3 top-3 z-30 rounded-md border border-primary/50 bg-background/90 px-2.5 py-1.5 font-mono text-[10px]">
+            <span className="text-primary">{byId[hE.from]!.label}</span> → <span className="text-primary">{byId[hE.to]!.label}</span>
+            <div className="text-muted-foreground">{hE.label} · {flowLabel[hE.flow]}</div>
+          </div>
+        )}
+        <div className="absolute inset-0 origin-top-left" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.z})` }}>
         <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
           <defs>
             <filter id="sg-glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -132,12 +207,19 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
             const dim = !connected(e);
             return (
               <g key={e.id} className="transition-opacity duration-300" opacity={dim ? 0.12 : 1}>
-                <path id={`sg-${e.id}`} d={paths[e.id]} fill="none" vectorEffect="non-scaling-stroke" strokeWidth={isActive ? 3 : inTrail ? 2 : 1.2}
-                  strokeOpacity={isActive ? 1 : inTrail ? 0.8 : 0.45}
+                <path id={`sg-${e.id}`} d={paths[e.id]} fill="none" vectorEffect="non-scaling-stroke" strokeWidth={hoverEdge === e.id ? 3.5 : isActive ? 3 : inTrail ? 2 : 1.4}
+                  strokeOpacity={hoverEdge === e.id || isActive ? 1 : inTrail ? 0.8 : 0.5}
                   strokeDasharray={e.blocked ? "3 4" : undefined}
                   className={`${e.blocked ? "stroke-destructive" : flowStroke[e.flow]} ${!e.blocked ? "flow-dash" : ""}`}
                   markerEnd={`url(#arrow-${e.flow})`}
                 />
+                {/* connector pips at both ends */}
+                {[geoms[e.id]!.s, geoms[e.id]!.t].map(([px, py], k) => (
+                  <rect key={k} x={px - 0.45} y={py - 0.7} width={0.9} height={1.4} rx={0.2} className={`${e.blocked ? "fill-destructive" : flowFill[e.flow]}`} opacity={0.9} />
+                ))}
+                {/* wide invisible hit area so lines are easy to find */}
+                <path d={paths[e.id]} fill="none" stroke="transparent" strokeWidth={12} vectorEffect="non-scaling-stroke" pointerEvents="stroke" className="cursor-pointer"
+                  onMouseEnter={() => setHoverEdge(e.id)} onMouseLeave={() => setHoverEdge(null)} onClick={() => setSelected(e.to)} />
                 {/* ambient flow */}
                 {!e.blocked && [0, 1].map((k) => (
                   <circle key={k} r={0.45} className={flowFill[e.flow]} opacity={0.7}>
@@ -222,6 +304,7 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
           {Array.from({ length: 10 }).map((_, i) => (
             <span key={i} className="eq w-1 origin-bottom rounded-sm bg-success/80" style={{ height: "100%", animationDelay: `${i * 0.09}s` }} />
           ))}
+        </div>
         </div>
       </div>
 
