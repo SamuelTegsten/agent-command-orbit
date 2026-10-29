@@ -186,8 +186,8 @@ export function SystemGraph({ title = "", subtitle = "", compact = false, onSele
               <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
             {(Object.keys(flowStroke) as Flow[]).map((f) => (
-              <marker key={f} id={`arrow-${f}`} viewBox="0 0 6 6" refX="5" refY="3" markerWidth="4" markerHeight="4" orient="auto">
-                <path d="M0,0 L6,3 L0,6 z" className={flowFill[f]} />
+              <marker key={f} id={`arrow-${f}`} viewBox="0 0 6 6" refX="4.6" refY="3" markerWidth="1.6" markerHeight="1.6" markerUnits="userSpaceOnUse" orient="auto">
+                 <path d="M0,0 L6,3 L0,6 z" className={flowFill[f]} />
               </marker>
             ))}
           </defs>
