@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { clients, runs } from "@/lib/mock";
 import { gnodes, scenario, zones } from "@/lib/systemGraph";
@@ -38,16 +38,9 @@ function Monitor() {
   const [graphSel, setGraphSel] = useState("orch");
   const [trace, setTrace] = useState<{ k: number; t: string; msg: string }[]>([]);
   const [sheet, setSheet] = useState(false);
-  const [clock, setClock] = useState("");
   const { nodes, health } = topo;
   const last = (a: number[]) => a[a.length - 1] ?? 0;
 
-  useEffect(() => {
-    const tick = () => setClock(new Date().toLocaleString("en-GB", { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" }));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
 
   const onStep = useCallback((i: number) => {
     const s = scenario[i];
@@ -75,16 +68,8 @@ function Monitor() {
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px] 2xl:grid-cols-[230px_minmax(0,1fr)_330px]">
       {/* Left: data overview */}
       <aside className="space-y-3 xl:col-span-2 2xl:col-span-1">
-        <div className="hidden 2xl:block">
-          <h1 className="text-[28px] font-bold leading-[1.05] tracking-tight">
-            Factory
-            <br />
-            Monitor
-          </h1>
-          <div className="mt-2 font-mono text-[11px] text-muted-foreground">{clock || "—"}</div>
-        </div>
         <div className="panel overflow-hidden">
-          <div className="bg-secondary px-3 py-2 text-xs font-semibold tracking-wide">Data overview</div>
+          <div className="panel-head">Data overview</div>
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-1">
             {kpis.map((x) => (
               <div key={x.k} className="border-t border-border px-3 py-3 xl:border-l 2xl:border-l-0">
@@ -128,7 +113,7 @@ function Monitor() {
       {/* Right: details, workflow list, curve */}
       <aside className="space-y-3">
         <div className="panel overflow-hidden">
-          <div className="bg-secondary px-4 py-2 text-xs font-semibold tracking-wide">{scene === "system" ? "Component" : "Selection"}</div>
+          <div className="panel-head">{scene === "system" ? "Component" : "Selection"}</div>
           <div className="p-4">
             {scene === "system" && sel ? (
               <div>
@@ -146,7 +131,7 @@ function Monitor() {
         </div>
 
         <div className="panel overflow-hidden">
-          <div className="bg-secondary px-4 py-2 text-xs font-semibold tracking-wide">Workflow list</div>
+          <div className="panel-head">Workflow list</div>
           <table className="w-full text-[11px]">
             <thead>
               <tr className="font-mono text-[10px] uppercase text-muted-foreground">
@@ -176,14 +161,14 @@ function Monitor() {
         </div>
 
         <div className="panel overflow-hidden">
-          <div className="bg-secondary px-4 py-2 text-xs font-semibold tracking-wide">Throughput · 24 samples</div>
+          <div className="panel-head">Throughput · 24 samples</div>
           <div className="p-4">
             <AreaCurve data={health.tasks} />
           </div>
         </div>
 
         <div className="panel overflow-hidden">
-          <div className="bg-secondary px-4 py-2 text-xs font-semibold tracking-wide">Live trace</div>
+          <div className="panel-head">Live trace</div>
           <div className="h-[132px] space-y-1 overflow-hidden p-3 font-mono text-[10.5px]">
             {trace.length === 0 && <div className="text-muted-foreground">listening…</div>}
             {trace.map((l, i) => (

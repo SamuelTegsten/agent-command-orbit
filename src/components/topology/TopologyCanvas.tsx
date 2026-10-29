@@ -126,7 +126,7 @@ export function TopologyCanvas({ topo }: { topo: Topo }) {
 
       {/* Hub */}
       <div className={`absolute -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 ${dim("hub")}`} style={{ left: `${HUB.x}%`, top: `${HUB.y}%`, width: "22%" }}>
-        <div className="pointer-events-none absolute -inset-5 rounded-full border border-primary/25 blink" />
+        <div className="pointer-events-none absolute -inset-5 rounded-sm border border-primary/25 blink" />
         <div className={`panel relative p-3 transition-all ${selection.kind === "hub" ? "border-primary glow-primary" : "border-primary/50"}`}>
           <button {...bind({ kind: "hub", id: "hub" })} className="flex w-full items-center gap-2 text-left">
             <Network className="h-5 w-5 text-primary" />
@@ -144,7 +144,7 @@ export function TopologyCanvas({ topo }: { topo: Topo }) {
               );
             })}
           </div>
-          <div className="relative mt-2.5 h-1 overflow-hidden rounded-full bg-secondary">
+          <div className="relative mt-2.5 h-1 overflow-hidden rounded-sm bg-secondary">
             <div className="absolute inset-y-0 w-1/4 bg-primary scan" />
           </div>
         </div>
@@ -171,14 +171,14 @@ export function TopologyCanvas({ topo }: { topo: Topo }) {
         const hn = nodes.filter((n) => n.host === h.id);
         const load = Math.round(hn.reduce((a, n) => a + n.cpu, 0) / h.slots);
         return (
-          <div key={h.id} className="absolute rounded-md border border-border/70 bg-secondary/30" style={{ left: "67%", width: "31%", top: `${zoneTop(hi)}%`, height: "29%" }}>
+          <div key={h.id} className="absolute rounded-sm border border-border/70 bg-secondary/30" style={{ left: "67%", width: "31%", top: `${zoneTop(hi)}%`, height: "29%" }}>
             <div className="flex items-center gap-2 px-2.5 pt-1.5 font-mono text-[10px]">
               <Server className="h-3 w-3 text-muted-foreground" />
               <span>{h.id}</span>
               <span className="text-muted-foreground">· {h.zone}</span>
               <span className="ml-auto text-muted-foreground">load {load}%</span>
             </div>
-            <div className="mx-2.5 mt-1 h-0.5 rounded-full bg-secondary">
+            <div className="mx-2.5 mt-1 h-0.5 rounded-sm bg-secondary">
               <div className="h-full rounded-full bg-primary/70 transition-all duration-700" style={{ width: `${load}%` }} />
             </div>
           </div>
