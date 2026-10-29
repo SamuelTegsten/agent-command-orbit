@@ -249,7 +249,7 @@ export function SystemGraph({ title, subtitle }: { title: string; subtitle: stri
 }
 
 // A comet of particles racing along one path, driven by rAF.
-function Burst({ d, cls, blocked }: { d: string; cls: string; blocked?: boolean }) {
+function Burst({ d, cls, blocked }: { d: string; cls: string; blocked?: boolean | undefined }) {
   const pathRef = useRef<SVGPathElement>(null);
   const dots = useRef<(SVGCircleElement | null)[]>([]);
   useEffect(() => {
