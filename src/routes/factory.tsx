@@ -95,44 +95,26 @@ function Overview({ list, setList }: { list: Session[]; setList: (fn: (l: Sessio
     <div className="mx-auto max-w-[1400px] space-y-3">
       {/* Composer: the primary action */}
       <section className="panel overflow-hidden">
-        <div className="panel-head flex items-center gap-3 px-3 py-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary">02 / Factory</span>
-          <span className="font-mono text-[10px] text-muted-foreground">start a session — the swarm plans, builds and lands it</span>
-          <span className="ml-auto flex items-center gap-1.5 font-mono text-[10px] text-success"><span className="h-1.5 w-1.5 rounded-full bg-success blink" />daemon on</span>
-        </div>
-        <div className="p-3">
+        <div className="p-4">
+          <div className="mb-2 flex items-baseline gap-3">
+            <h1 className="font-display text-lg font-bold">What should the factory build?</h1>
+            <span className="ml-auto flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground"><span className="h-1.5 w-1.5 rounded-full bg-success" />{working.length} working</span>
+          </div>
           <div className="flex items-stretch gap-2 rounded-sm border border-input bg-background/60 focus-within:border-primary">
             <textarea
               value={brief}
               onChange={(e) => setBrief(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); start(); } }}
               rows={2}
-              placeholder="What should the factory build? e.g. “Add a JSON flag to craton status”"
+              placeholder="Describe a task — Ctrl+Enter to start"
               className="min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none"
             />
             <button onClick={start} disabled={!brief.trim()} className="m-1.5 flex items-center gap-1.5 self-end rounded-sm bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-40">
               Start <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
-            <span>try:</span>
-            {["Fix the flaky merge test", "Tydligare tomma lägen på mobil", "Write docs for craton ai do"].map((s) => (
-              <button key={s} onClick={() => setBrief(s)} className="rounded-sm border border-border px-2 py-0.5 hover:border-primary hover:text-primary">{s}</button>
-            ))}
-            <span className="ml-auto hidden md:inline">Ctrl+Enter starts</span>
-          </div>
         </div>
       </section>
-
-      <div className="panel grid grid-cols-2 divide-x divide-border/60 lg:grid-cols-4">
-        {stats.map((t) => (
-          <div key={t.k} className="px-3 py-2.5">
-            <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground"><t.icon className={`h-3 w-3 ${t.bad ? "text-destructive" : "text-primary"}`} />{t.k}</div>
-            <div className={`font-display text-xl font-bold leading-tight ${t.bad ? "text-destructive" : ""}`}>{t.v}</div>
-            <div className="text-[10px] text-muted-foreground">{t.f}</div>
-          </div>
-        ))}
-      </div>
 
       {failed.length > 0 && (
         <section className="panel border-destructive/40">
@@ -243,7 +225,7 @@ function SessionView({ session: x, update }: { session: Session; update: Update 
   const [filter, setFilter] = useState<"all" | "notes">("all");
   const [mode, setMode] = useState<"instruction" | "quickfix">("instruction");
   const [draft, setDraft] = useState("");
-  const [showEvents, setShowEvents] = useState(true);
+  const [showEvents, setShowEvents] = useState(false);
   const [paused, setPaused] = useState(false);
   const end = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -444,22 +426,20 @@ function SessionView({ session: x, update }: { session: Session; update: Update 
       )}
         {/* Side: instruction queue */}
         <aside className="panel overflow-hidden">
-          <div className="grid grid-cols-4 divide-x divide-border/60 border-b border-border/60">
-            {(Object.entries(counts) as [string, number][]).map(([k, v]) => (
-              <div key={k} className="px-2 py-2 text-center">
-                <div className={`font-display text-lg font-bold leading-none ${k === "failed" && v ? "text-destructive" : k === "running" && v ? "text-primary" : ""}`}>{v}</div>
-                <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">{k}</div>
-              </div>
-            ))}
+          <div className="panel-head flex items-center gap-3 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Instructions
+            <span className="ml-auto normal-case tracking-normal">
+              {counts.landed} landed{counts.running ? ` · ${counts.running} running` : ""}{counts.queued ? ` · ${counts.queued} queued` : ""}{counts.failed ? <span className="text-destructive"> · {counts.failed} failed</span> : ""}
+            </span>
           </div>
-          <div className="panel-head px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Instructions</div>
-          <ul className="max-h-[50vh] divide-y divide-border/50 overflow-y-auto">
-            {x.instructions.length === 0 && <li className="px-3 py-4 text-xs text-muted-foreground">No instructions yet.</li>}
+          <ul className="divide-y divide-border/50">
+            {x.instructions.length === 0 && <li className="px-3 py-6 text-center text-xs text-muted-foreground">Nothing yet — start in the chat.</li>}
             {x.instructions.map((i) => (
               <li key={i.n}>
-                <button onClick={() => jump(i.n)} className="flex w-full items-start gap-2 px-3 py-2 text-left text-xs hover:bg-secondary/30">
-                  <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${i.status === "landed" ? "bg-success" : i.status === "failed" ? "bg-destructive" : i.status === "waiting" ? "bg-muted-foreground" : "bg-primary blink"}`} />
-                  <span className="min-w-0 flex-1"><span className="font-mono text-muted-foreground">#{i.n}</span> <span className="line-clamp-2">{i.text}</span></span>
+                <button onClick={() => jump(i.n)} className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-secondary/30">
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${i.status === "landed" ? "bg-success" : i.status === "failed" ? "bg-destructive" : i.status === "waiting" ? "bg-muted-foreground" : "bg-primary blink"}`} />
+                  <span className="w-6 shrink-0 font-mono text-[11px] text-muted-foreground">#{i.n}</span>
+                  <span className="min-w-0 flex-1 truncate">{i.text}</span>
                   <span className={`shrink-0 font-mono text-[10px] ${i.status === "failed" ? "text-destructive" : i.status === "running" ? "text-primary" : "text-muted-foreground"}`}>
                     {i.status === "landed" ? i.commit?.slice(0, 7) : i.status === "waiting" ? "queued" : i.status}
                   </span>
@@ -468,25 +448,6 @@ function SessionView({ session: x, update }: { session: Session; update: Update 
             ))}
           </ul>
         </aside>
-        <div className="grid gap-3 xl:grid-cols-2">
-          <section className="panel overflow-hidden">
-            <div className="panel-head px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Session facts</div>
-            <dl className="divide-y divide-border/50 font-mono text-[11px]">
-              {[["scope", x.scope], ["branch", x.branch], ["head", x.commit], ["cost", x.cost], ["updated", x.ago], ["state", paused ? "paused" : x.status]].map(([k, v]) => (
-                <div key={k} className="flex justify-between gap-4 px-3 py-1.5"><dt className="text-muted-foreground">{k}</dt><dd className="truncate text-right">{v}</dd></div>
-              ))}
-            </dl>
-          </section>
-          <section className="panel overflow-hidden">
-            <div className="panel-head px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Landed on master</div>
-            <ul className="divide-y divide-border/50">
-              {x.timeline.filter((t) => t.kind === "landed").length === 0 && <li className="px-3 py-4 text-xs text-muted-foreground">Nothing landed yet — send an instruction in the chat.</li>}
-              {x.timeline.filter((t) => t.kind === "landed").slice(-6).reverse().map((t, i) => (
-                <li key={i} className="flex items-center gap-2 px-3 py-2 text-xs"><GitMerge className="h-3.5 w-3.5 shrink-0 text-success" /><span className="min-w-0 flex-1 truncate font-mono">{t.text}</span><span className="font-mono text-[10px] text-muted-foreground">{t.ago}</span></li>
-              ))}
-            </ul>
-          </section>
-        </div>
       </div>
     </div>
   );
